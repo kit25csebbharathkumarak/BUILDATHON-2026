@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { PrismaClient } from '@prisma/client'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCellMono } from '@/components/ui/DataTable'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Badge } from '@/components/ui/Badge'
+import { Search, Star, BookOpen, GraduationCap, Clock } from 'lucide-react'
 
 const prisma = new PrismaClient()
 
@@ -12,88 +15,139 @@ export default async function CoursesPage(props: { searchParams: Promise<{ q?: s
   const courses = await prisma.course.findMany({
     where: {
       OR: [
-        { title: { contains: query } },
-        { description: { contains: query } },
-        { category: { contains: query } },
+        { title: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { category: { contains: query, mode: 'insensitive' } },
       ],
     },
-    include: { teacher: true },
+    include: { 
+      teacher: true,
+      _count: { select: { enrollments: true, assignments: true } }
+    },
     orderBy: { rating: 'desc' }
   })
 
   return (
-    <div className="py-16 md:py-24">
-      <div className="border-b border-ink pb-8 mb-12">
-        <h1 className="font-serif text-4xl md:text-5xl font-light mb-4">Course Ledger</h1>
-        <p className="text-lg text-ink/70 max-w-2xl font-sans">
-          Browse our complete academic offering.
-        </p>
+    <div className="animate-fade-in bg-parchment min-h-screen pb-24">
+      {/* Premium Header */}
+      <div className="bg-ink text-white pt-24 pb-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-3xl">
+            <Badge variant="warning" className="mb-6 bg-primary-red text-white border-none uppercase tracking-widest text-xs font-bold">
+              Course Catalog
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+              Expand your <span className="text-primary-red">knowledge</span>.
+            </h1>
+            <p className="text-lg md:text-xl text-white/70 font-light mb-8">
+              Browse our comprehensive academic offerings taught by industry experts and top faculty members.
+            </p>
+            
+            {/* Search Bar */}
+            <form className="flex max-w-xl shadow-2xl rounded-lg overflow-hidden bg-white/10 backdrop-blur-md border border-white/20 p-1" action="/courses" method="GET">
+              <div className="flex items-center pl-4 pr-2">
+                <Search className="w-5 h-5 text-white/50" />
+              </div>
+              <input
+                type="search"
+                name="q"
+                defaultValue={query}
+                placeholder="Search by title, subject, or keywords..."
+                className="flex-1 bg-transparent border-none text-white placeholder:text-white/50 px-3 py-3 focus:outline-none focus:ring-0 w-full"
+              />
+              <button type="submit" className="bg-primary-red hover:bg-primary-red/90 text-white px-6 py-2 rounded-md font-bold transition-colors">
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
       
-      <div className="mb-8">
-        <form className="flex max-w-md" action="/courses" method="GET">
-          <input
-            type="search"
-            name="q"
-            defaultValue={query}
-            placeholder="Search catalog..."
-            className="flex-1 bg-paper border border-ledger-line rounded-l-[2px] px-4 py-2 text-sm focus:outline-none focus:border-marigold"
-          />
-          <button type="submit" className="bg-ink text-paper px-6 py-2 rounded-r-[2px] text-sm font-medium hover:bg-ink/90 transition-colors">
-            Search
-          </button>
-        </form>
-      </div>
+      {/* Course Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+        
+        {query && (
+          <div className="bg-white px-6 py-4 rounded-xl shadow-sm border border-ledger-line mb-8 flex items-center justify-between">
+            <span className="text-ink/70 font-medium">
+              Showing results for <span className="text-ink font-bold">"{query}"</span>
+            </span>
+            <Badge variant="neutral">{courses.length} courses found</Badge>
+          </div>
+        )}
 
-      {query && (
-        <div className="font-mono text-sm mb-6 text-ink/70">
-          FILTER: "{query}" — {courses.length} matches
-        </div>
-      )}
-
-      {courses.length === 0 ? (
-        <EmptyState 
-          title="No courses found" 
-          description="We couldn't find any courses matching your search criteria." 
-        />
-      ) : (
-        <div className="bg-paper border border-ledger-line shadow-sm rounded-[2px] overflow-hidden">
-          <Table>
-            <TableHeader className="bg-parchment">
-              <TableRow>
-                <TableHead className="w-[120px]">Code / Category</TableHead>
-                <TableHead>Course Title</TableHead>
-                <TableHead>Instructor</TableHead>
-                <TableHead className="text-right">Rating</TableHead>
-                <TableHead className="w-[100px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {courses.map(course => (
-                <TableRow key={course.id}>
-                  <TableCellMono className="text-ink/60 uppercase text-xs">
-                    {course.category.substring(0,3)}-{course.id.substring(course.id.length-4)}
-                  </TableCellMono>
-                  <TableCell className="font-medium text-base">
-                    {course.title}
-                  </TableCell>
-                  <TableCell>
-                    {course.teacher.name}
-                  </TableCell>
-                  <TableCellMono className="text-right">
+        {courses.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-sm border border-ledger-line p-12 mt-8">
+            <EmptyState 
+              title="No courses found" 
+              description="We couldn't find any courses matching your search criteria. Try using different keywords." 
+            />
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
+            {courses.map(course => (
+              <Card key={course.id} className="group hover:shadow-2xl transition-all duration-300 border-none shadow-md overflow-hidden bg-white flex flex-col h-full rounded-2xl">
+                {/* Card Image Placeholder */}
+                <div className="h-48 bg-ink relative overflow-hidden flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+                  <BookOpen className="w-16 h-16 text-white/20 group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur text-ink px-2 py-1 rounded-md text-xs font-bold flex items-center gap-1 shadow-sm">
+                    <Star className="w-3 h-3 text-marigold fill-marigold" />
                     {course.rating.toFixed(1)}
-                  </TableCellMono>
-                  <TableCell className="text-right">
-                    <Link href={`/courses/${course.id}`} className="text-sm font-medium hover:text-marigold border-b border-transparent hover:border-marigold transition-all">
-                      View
+                  </div>
+                </div>
+                
+                <CardContent className="p-6 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-3">
+                    <Badge variant="neutral" className="bg-accent-red text-primary-red border-none font-bold uppercase tracking-wider text-[10px]">
+                      {course.category}
+                    </Badge>
+                    <span className="text-xs font-mono text-ink/40">
+                      {course.category.substring(0,3).toUpperCase()}-{course.id.substring(course.id.length-4)}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold mb-2 text-ink line-clamp-2 group-hover:text-primary-red transition-colors">
+                    {course.title}
+                  </h3>
+                  
+                  <p className="text-sm text-ink/60 line-clamp-2 mb-6 flex-1">
+                    {course.description}
+                  </p>
+                  
+                  <div className="flex items-center gap-4 text-xs font-medium text-ink/60 mb-6 pb-6 border-b border-ledger-line/50">
+                    <div className="flex items-center gap-1">
+                      <GraduationCap className="w-4 h-4 text-primary-red" />
+                      <span>{course._count.enrollments} Students</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4 text-primary-red" />
+                      <span>{course._count.assignments} Tasks</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center text-white font-bold text-xs">
+                        {course.teacher.name.charAt(0)}
+                      </div>
+                      <div className="text-sm">
+                        <p className="font-bold text-ink leading-none mb-1">{course.teacher.name}</p>
+                        <p className="text-xs text-ink/50 leading-none">Instructor</p>
+                      </div>
+                    </div>
+                    <Link href={`/courses/${course.id}`}>
+                      <Button variant="outline" size="sm" className="hover:bg-primary-red hover:text-white hover:border-primary-red transition-colors">
+                        View Course
+                      </Button>
                     </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
