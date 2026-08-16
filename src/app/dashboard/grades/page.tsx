@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { redirect } from 'next/navigation'
 import { Printer } from 'lucide-react'
+import { PrintButton } from '@/components/ui/PrintButton'
 
 const prisma = new PrismaClient()
 
@@ -34,11 +35,7 @@ export default async function GradesPage() {
           </p>
         </div>
         <div className="text-right">
-          {/* Note: This would typically be a client component button to trigger window.print() */}
-          <button className="inline-flex items-center gap-2 px-4 py-2 border border-ledger-line rounded-md text-sm font-medium text-ink hover:bg-parchment hover:text-primary-red transition-colors print:hidden">
-            <Printer className="w-4 h-4" />
-            Print Record
-          </button>
+          <PrintButton />
         </div>
       </div>
 
@@ -102,16 +99,34 @@ export default async function GradesPage() {
         </CardContent>
         
         {enrollments.length > 0 && (
-          <div className="bg-parchment/30 p-6 border-t border-ledger-line flex justify-between items-center print:bg-white print:border-t-2 print:border-black">
-            <div>
-              <div className="text-sm text-ink/60">Cumulative GPA</div>
-              <div className="text-2xl font-bold text-ink">3.8 <span className="text-sm font-normal text-ink/50">/ 4.0</span></div>
-            </div>
-            <div>
-              <div className="text-sm text-ink/60">Academic Standing</div>
-              <div className="text-lg font-bold text-green-600">Good</div>
-            </div>
-          </div>
+          (() => {
+            const totalCredits = enrollments.length * 3.0
+            const totalGradePoints = enrollments.reduce((acc, enr) => {
+              const gradeScore = enr.progress
+              let gp = 0.0
+              if (gradeScore > 90) gp = 4.0
+              else if (gradeScore > 80) gp = 3.0
+              else if (gradeScore > 70) gp = 2.0
+              else if (gradeScore > 60) gp = 1.0
+              return acc + (gp * 3.0)
+            }, 0)
+            
+            const gpa = (totalGradePoints / totalCredits).toFixed(2)
+            const standing = parseFloat(gpa) >= 2.0 ? 'Good' : 'Probation'
+
+            return (
+              <div className="bg-parchment/30 p-6 border-t border-ledger-line flex justify-between items-center print:bg-white print:border-t-2 print:border-black">
+                <div>
+                  <div className="text-sm text-ink/60">Cumulative GPA</div>
+                  <div className="text-2xl font-bold text-ink">{gpa} <span className="text-sm font-normal text-ink/50">/ 4.0</span></div>
+                </div>
+                <div>
+                  <div className="text-sm text-ink/60">Academic Standing</div>
+                  <div className={`text-lg font-bold ${standing === 'Good' ? 'text-green-600' : 'text-primary-red'}`}>{standing}</div>
+                </div>
+              </div>
+            )
+          })()
         )}
       </Card>
     </div>
