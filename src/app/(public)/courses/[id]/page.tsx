@@ -181,10 +181,7 @@ export default async function CourseDetailsPage(props: { params: Promise<{ id: s
                       </span>
                     </div>
                     <p className="text-sm text-ink/70 mb-3">{mod.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-ink/60 font-mono">
-                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {mod.lessons} Lessons</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> Graded Milestones</span>
+                  </div>
                   </div>
                 ))
               ) : (
