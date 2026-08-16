@@ -120,7 +120,7 @@ export default async function AssignmentDetailsPage(props: { params: Promise<{ i
                     <tbody>
                       {assignment.submissions.map(sub => (
                         <tr key={sub.id} className="border-b border-ledger-line">
-                          <td className="p-4 font-medium">{sub.student.name}</td>
+                          <td className="p-4 font-medium">{(sub as any).student?.name}</td>
                           <td className="p-4">
                             {sub.grade ? <Badge variant="success">Graded</Badge> : <Badge variant="neutral">Needs Grading</Badge>}
                           </td>

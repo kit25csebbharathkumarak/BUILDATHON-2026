@@ -23,7 +23,6 @@ export default async function RecommendationsPage() {
 
   const atRisk = recommendations.filter(r => r.type === 'AT_RISK')
   const suggestions = recommendations.filter(r => r.type === 'RECOMMENDATION')
-  const positive = recommendations.filter(r => r.type === 'POSITIVE')
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -49,7 +48,7 @@ export default async function RecommendationsPage() {
             
             <div className="space-y-4">
               {recommendations.map((insight) => {
-                const tone = insight.type === 'AT_RISK' ? 'warning' : insight.type === 'POSITIVE' ? 'success' : 'insight'
+                const tone = insight.type === 'AT_RISK' ? 'warning' : insight.type === 'RECOMMENDATION' ? 'success' : 'insight'
                 
                 return (
                   <MarginaliaNote key={insight.id} tone={tone} className="p-6">
@@ -101,11 +100,7 @@ export default async function RecommendationsPage() {
                 </li>
                 <li className="flex justify-between items-center">
                   <span className="text-sm font-medium text-ink/70">Suggestions</span>
-                  <span className="font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full text-xs">{suggestions.length}</span>
-                </li>
-                <li className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-ink/70">Positive Notes</span>
-                  <span className="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full text-xs">{positive.length}</span>
+                  <span className="font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full text-xs">{suggestions.length}</span>
                 </li>
               </ul>
               
