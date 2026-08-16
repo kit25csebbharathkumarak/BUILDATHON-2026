@@ -112,7 +112,6 @@ export default async function MyCoursesPage() {
     )
   }
 
-  // Student View
   const enrollments = await prisma.enrollment.findMany({
     where: { userId: session.id },
     include: {
@@ -130,6 +129,12 @@ export default async function MyCoursesPage() {
       }
     }
   })
+
+  const userWithClasses = await prisma.user.findUnique({
+    where: { id: session.id },
+    include: { enrolledClasses: true }
+  })
+  const studentClasses = userWithClasses?.enrolledClasses || []
 
   // Also fetch all available courses so students can quick enroll!
   const enrolledCourseIds = new Set(enrollments.map(e => e.course.id))
@@ -183,7 +188,9 @@ export default async function MyCoursesPage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {enrollments.map((enrollment) => (
+            {enrollments.map((enrollment) => {
+              const assignedClass = studentClasses.find((c: any) => c.courseId === enrollment.course.id)
+              return (
               <Card key={enrollment.id} className="flex flex-col h-full bg-white hover:shadow-md transition-shadow border-ledger-line">
                 <div className="h-28 bg-gradient-to-r from-accent-red to-parchment p-5 flex flex-col justify-between border-b border-ledger-line">
                   <div className="flex justify-between items-start">
@@ -192,8 +199,15 @@ export default async function MyCoursesPage() {
                       ★ {enrollment.course.rating.toFixed(1)}
                     </span>
                   </div>
-                  <div className="text-xs text-ink/60 font-mono">
-                    Instructor: {enrollment.course.teacher.name}
+                  <div className="flex justify-between items-end">
+                    <div className="text-xs text-ink/60 font-mono">
+                      Instructor: {enrollment.course.teacher.name}
+                    </div>
+                    {assignedClass && (
+                      <div className="text-xs font-bold text-primary-red bg-white/80 px-2 py-0.5 rounded-sm">
+                        {assignedClass.name}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -247,7 +261,7 @@ export default async function MyCoursesPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         </div>
       )}

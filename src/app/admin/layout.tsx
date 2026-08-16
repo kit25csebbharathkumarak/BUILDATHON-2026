@@ -56,10 +56,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
           <Link href="/admin/courses" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
             <Library className="w-4 h-4" />
-            Manage Courses & Classes
+            Manage Courses
+          </Link>
+          <Link href="/admin/classes" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+            <BookOpen className="w-4 h-4" />
+            Manage Classes
           </Link>
           <Link href="/admin/assignments" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
-            <BookOpen className="w-4 h-4" />
+            <FileSpreadsheet className="w-4 h-4" />
             Manage Assignments
           </Link>
           <Link href="/admin/exams" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">

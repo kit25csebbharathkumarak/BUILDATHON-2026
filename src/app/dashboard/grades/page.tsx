@@ -29,20 +29,30 @@ export default async function GradesPage() {
       }
     })
   } else {
-    const teacherCourses = await prisma.course.findMany({
+    const teacherClasses = await prisma.class.findMany({
       where: { teacherId: session.id },
-      select: { id: true }
-    })
-    const courseIds = teacherCourses.map(c => c.id)
-
-    studentGrades = await prisma.enrollment.findMany({
-      where: { courseId: { in: courseIds } },
       include: {
-        user: true,
         course: true,
-      },
-      orderBy: { user: { name: 'asc' } }
+        students: {
+          include: { enrollments: true }
+        }
+      }
     })
+
+    for (const cls of teacherClasses) {
+      for (const student of cls.students) {
+        const enrollment = student.enrollments.find((e: any) => e.courseId === cls.courseId)
+        if (enrollment) {
+          studentGrades.push({
+            id: enrollment.id,
+            progress: enrollment.progress,
+            user: student,
+            course: cls.course,
+            className: cls.name
+          })
+        }
+      }
+    }
   }
 
   return (
@@ -168,6 +178,7 @@ export default async function GradesPage() {
                 <thead className="bg-white border-b border-ledger-line">
                   <tr>
                     <th className="py-4 px-6 font-semibold text-ink/70">Student</th>
+                    <th className="py-4 px-6 font-semibold text-ink/70">Class Section</th>
                     <th className="py-4 px-6 font-semibold text-ink/70">Course</th>
                     <th className="py-4 px-6 font-semibold text-ink/70 text-right">Current Grade</th>
                     <th className="py-4 px-6 font-semibold text-ink/70 text-right">Action</th>
@@ -185,6 +196,7 @@ export default async function GradesPage() {
                           <div className="font-bold text-ink">{enr.user.name}</div>
                           <div className="text-xs text-ink/50">{enr.user.email}</div>
                         </td>
+                        <td className="py-4 px-6 font-medium text-primary-red">{enr.className}</td>
                         <td className="py-4 px-6 text-ink/80">{enr.course.title}</td>
                         <td className="py-4 px-6 text-right">
                           <div className="flex items-center justify-end gap-3">

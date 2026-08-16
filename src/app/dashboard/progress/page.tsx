@@ -17,7 +17,7 @@ export default async function ProgressPage() {
 
   let aiInsights: any[] = []
   let masteryPercentage = 78
-  let teacherCourses: any[] = []
+  let teacherClasses: any[] = []
 
   if (isStudent) {
     aiInsights = await prisma.aIInsight.findMany({
@@ -26,15 +26,25 @@ export default async function ProgressPage() {
       take: 3
     })
   } else {
-    teacherCourses = await prisma.course.findMany({
+    teacherClasses = await prisma.class.findMany({
       where: { teacherId: session.id },
       include: {
-        _count: { select: { enrollments: true } },
-        enrollments: true
+        course: true,
+        students: {
+          include: { enrollments: true }
+        },
+        _count: { select: { students: true } }
       }
     })
     
-    const allProgress = teacherCourses.flatMap(c => c.enrollments.map((e: any) => e.progress))
+    let allProgress: number[] = []
+    teacherClasses.forEach(cls => {
+      cls.students.forEach((student: any) => {
+        const enrollment = student.enrollments.find((e: any) => e.courseId === cls.courseId)
+        if (enrollment) allProgress.push(enrollment.progress)
+      })
+    })
+
     if (allProgress.length > 0) {
       masteryPercentage = Math.round(allProgress.reduce((a, b) => a + b, 0) / allProgress.length)
     } else {
@@ -118,19 +128,24 @@ export default async function ProgressPage() {
                       </tr>
                     </>
                   ) : (
-                    teacherCourses.length === 0 ? (
+                    teacherClasses.length === 0 ? (
                       <tr>
                         <td colSpan={3} className="p-4 text-center text-ink/50">No classes assigned yet.</td>
                       </tr>
                     ) : (
-                      teacherCourses.map(course => {
-                        const classProgress = course.enrollments.map((e: any) => e.progress)
+                      teacherClasses.map(cls => {
+                        const classProgress: number[] = []
+                        cls.students.forEach((student: any) => {
+                          const enrollment = student.enrollments.find((e: any) => e.courseId === cls.courseId)
+                          if (enrollment) classProgress.push(enrollment.progress)
+                        })
+                        
                         const avg = classProgress.length > 0 ? Math.round(classProgress.reduce((a: number, b: number) => a + b, 0) / classProgress.length) : 0
                         return (
-                          <tr key={course.id} className="border-b border-ledger-line">
-                            <td className="p-4 font-medium">{course.title}</td>
+                          <tr key={cls.id} className="border-b border-ledger-line">
+                            <td className="p-4 font-medium">{cls.name} <span className="text-ink/50 text-xs block">{cls.course.title}</span></td>
                             <td className="p-4 font-bold text-ink">{avg}%</td>
-                            <td className="p-4 font-medium text-ink/70">{course._count.enrollments}</td>
+                            <td className="p-4 font-medium text-ink/70">{cls._count.students}</td>
                           </tr>
                         )
                       })

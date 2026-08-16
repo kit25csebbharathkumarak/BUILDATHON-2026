@@ -23,6 +23,7 @@ model User {
   enrollments Enrollment[]
   grades      Grade[]
   classes     Class[]      @relation("TeacherClasses")
+  enrolledClasses Class[]  @relation("ClassStudents")
   coursesTaught Course[]   @relation("TeacherCourses")
   submissions Submission[]
   aiInsights  AIInsight[]
@@ -65,6 +66,7 @@ model Class {
   teacherId   String
   course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  students    User[]       @relation("ClassStudents")
   attendances Attendance[]
 }
 
