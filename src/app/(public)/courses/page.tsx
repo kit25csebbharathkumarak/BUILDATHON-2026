@@ -23,9 +23,9 @@ export default async function CoursesPage(props: {
   const whereClause: any = {}
   if (query) {
     whereClause.OR = [
-      { title: { contains: query } },
-      { description: { contains: query } },
-      { category: { contains: query } },
+      { title: { contains: query, mode: 'insensitive' } },
+      { description: { contains: query, mode: 'insensitive' } },
+      { category: { contains: query, mode: 'insensitive' } },
     ]
   }
   if (selectedCategory && selectedCategory !== 'ALL') {
