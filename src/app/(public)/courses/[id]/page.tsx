@@ -32,6 +32,9 @@ export default async function CourseDetailsPage(props: { params: Promise<{ id: s
       exams: {
         orderBy: { date: 'asc' }
       },
+      syllabus: {
+        orderBy: { module: 'asc' }
+      },
       _count: {
         select: { enrollments: true, classes: true, assignments: true, exams: true }
       }
@@ -166,29 +169,27 @@ export default async function CourseDetailsPage(props: { params: Promise<{ id: s
               Comprehensive Syllabus
             </h2>
             <div className="space-y-4">
-              {[
-                { module: 1, title: 'Foundations & Core Principles', desc: 'Introduction to fundamentals, setup of development environment, and core syntax.', lessons: 4, duration: '2 Weeks' },
-                { module: 2, title: 'Intermediate Concepts & Applications', desc: 'Structured analysis, problem decomposition, data handling, and algorithmic solutions.', lessons: 6, duration: '3 Weeks' },
-                { module: 3, title: 'Advanced Topics & Practical Labs', desc: 'Optimization, security considerations, collaborative workflows, and real-case studies.', lessons: 5, duration: '3 Weeks' },
-                { module: 4, title: 'Capstone Project & Final Assessment', desc: 'Comprehensive evaluation, project presentation, and performance analytics.', lessons: 3, duration: '2 Weeks' }
-              ].map((mod) => (
-                <div key={mod.module} className="p-4 rounded-lg border border-ledger-line hover:border-primary-red/50 transition-colors bg-parchment/30">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-ink text-base">
-                      Module {mod.module}: {mod.title}
-                    </h3>
-                    <span className="text-xs font-medium text-primary-red bg-accent-red px-2 py-0.5 rounded">
-                      {mod.duration}
-                    </span>
-                  </div>
-                  <p className="text-sm text-ink/70 mb-3">{mod.desc}</p>
+              {course.syllabus.length > 0 ? (
+                course.syllabus.map((mod) => (
+                  <div key={mod.id} className="p-4 rounded-lg border border-ledger-line hover:border-primary-red/50 transition-colors bg-parchment/30">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-ink text-base">
+                        Module {mod.module}: {mod.title}
+                      </h3>
+                      <span className="text-xs font-medium text-primary-red bg-accent-red px-2 py-0.5 rounded">
+                        {mod.duration}
+                      </span>
+                    </div>
+                    <p className="text-sm text-ink/70 mb-3">{mod.description}</p>
                   <div className="flex items-center gap-4 text-xs text-ink/60 font-mono">
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {mod.lessons} Lessons</span>
                     <span>•</span>
                     <span className="flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> Graded Milestones</span>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-ink/60 italic">Syllabus details will be announced soon.</p>
+              )}
             </div>
           </section>
 

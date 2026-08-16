@@ -44,6 +44,18 @@ model Course {
   classes     Class[]
   exams       Exam[]
   grades      Grade[]
+  syllabus    SyllabusModule[]
+}
+
+model SyllabusModule {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module      Int
+  title       String
+  description String
+  lessons     Int      @default(0)
+  duration    String
 }
 
 model Class {

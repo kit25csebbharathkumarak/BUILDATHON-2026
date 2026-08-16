@@ -22,6 +22,7 @@ async function main() {
   // Clean existing data
   await prisma.report.deleteMany()
   await prisma.aIInsight.deleteMany()
+  await prisma.syllabusModule.deleteMany()
   await prisma.grade.deleteMany()
   await prisma.examResult.deleteMany()
   await prisma.exam.deleteMany()
@@ -200,6 +201,60 @@ async function main() {
       type: AIInsightType.RECOMMENDATION,
       content: 'Based on recent quiz scores, reviewing Python loops would be beneficial.',
     },
+  })
+
+  // 11. Create Syllabus Modules
+  await prisma.syllabusModule.createMany({
+    data: [
+      {
+        courseId: course1.id,
+        module: 1,
+        title: 'Foundations & Core Principles',
+        description: 'Introduction to fundamentals, setup of development environment, and core syntax.',
+        lessons: 4,
+        duration: '2 Weeks'
+      },
+      {
+        courseId: course1.id,
+        module: 2,
+        title: 'Intermediate Concepts & Applications',
+        description: 'Structured analysis, problem decomposition, data handling, and algorithmic solutions.',
+        lessons: 6,
+        duration: '3 Weeks'
+      },
+      {
+        courseId: course1.id,
+        module: 3,
+        title: 'Advanced Topics & Practical Labs',
+        description: 'Optimization, security considerations, collaborative workflows, and real-case studies.',
+        lessons: 5,
+        duration: '3 Weeks'
+      },
+      {
+        courseId: course1.id,
+        module: 4,
+        title: 'Capstone Project & Final Assessment',
+        description: 'Comprehensive evaluation, project presentation, and performance analytics.',
+        lessons: 3,
+        duration: '2 Weeks'
+      },
+      {
+        courseId: course2.id,
+        module: 1,
+        title: 'Calculus Basics',
+        description: 'Limits, continuity, and derivatives.',
+        lessons: 5,
+        duration: '2 Weeks'
+      },
+      {
+        courseId: course2.id,
+        module: 2,
+        title: 'Advanced Integration',
+        description: 'Techniques of integration and applications.',
+        lessons: 6,
+        duration: '3 Weeks'
+      }
+    ]
   })
 
   console.log('Database seeding completed successfully.')
