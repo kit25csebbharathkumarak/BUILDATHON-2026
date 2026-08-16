@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         },
         submissions: {
           include: {
-            course: true,
+            assignment: { include: { course: true } }
           }
         }
       }
