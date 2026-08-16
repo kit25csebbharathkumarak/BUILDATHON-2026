@@ -1,12 +1,14 @@
 import { PrismaClient } from '@prisma/client'
-import { Table, TableBody, TableCell, TableCellMono, TableHead, TableHeader, TableRow } from '@/components/ui/DataTable'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
-import { MarginaliaNote } from '@/components/ui/MarginaliaNote'
+import { Table, TableBody, TableCell, TableCellMono, TableHead, TableHeader, TableRow } from '@/components/ui/DataTable'
+import { Users, GraduationCap, Library, AlertCircle } from 'lucide-react'
 
 const prisma = new PrismaClient()
 
 export default async function AdminDashboardPage() {
-  const userCount = await prisma.user.count()
+  const studentCount = await prisma.user.count({ where: { role: 'STUDENT' } })
+  const teacherCount = await prisma.user.count({ where: { role: 'TEACHER' } })
   const courseCount = await prisma.course.count()
   const enrollmentCount = await prisma.enrollment.count()
   
@@ -16,48 +18,69 @@ export default async function AdminDashboardPage() {
   })
 
   return (
-    <div className="space-y-12 animate-fade-in">
-      <header className="border-b border-ink pb-6 flex justify-between items-end">
-        <div>
-          <h1 className="font-serif text-3xl text-ink mb-2">
-            System Administration
-          </h1>
-          <p className="font-sans text-ink/70">
-            Platform-wide metrics and management ledger.
-          </p>
-        </div>
-        <div className="font-mono text-sm text-rust uppercase text-right">
-          <div>Access Level: Root</div>
-          <div>Environment: Production</div>
-        </div>
-      </header>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Admin Dashboard</h1>
+        <p className="text-ink/60 mt-2">System-wide overview and management ledger.</p>
+      </div>
 
       {/* System Stats */}
-      <div className="grid grid-cols-3 border-t border-l border-ledger-line bg-paper">
-        <div className="border-r border-b border-ledger-line p-8 flex flex-col text-center">
-          <span className="text-xs uppercase tracking-wider text-ink/50 font-semibold mb-2">Total Users</span>
-          <span className="font-mono text-5xl text-ink">{userCount}</span>
-        </div>
-        <div className="border-r border-b border-ledger-line p-8 flex flex-col text-center">
-          <span className="text-xs uppercase tracking-wider text-ink/50 font-semibold mb-2">Active Courses</span>
-          <span className="font-mono text-5xl text-ink">{courseCount}</span>
-        </div>
-        <div className="border-r border-b border-ledger-line p-8 flex flex-col text-center relative">
-          <span className="text-xs uppercase tracking-wider text-ink/50 font-semibold mb-2">Total Enrollments</span>
-          <span className="font-mono text-5xl text-ink">{enrollmentCount}</span>
-          
-          <div className="absolute -bottom-8 -right-8 z-10 hidden md:block">
-            <MarginaliaNote tone="insight" className="w-56 text-left">
-              Enrollments are up 12% week over week. System load is well within limits.
-            </MarginaliaNote>
-          </div>
-        </div>
+      <div className="grid md:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 bg-accent-red rounded-lg text-primary-red">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-ink/60">Total Students</p>
+              <p className="text-3xl font-bold text-ink">{studentCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 bg-accent-red rounded-lg text-primary-red">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-ink/60">Total Teachers</p>
+              <p className="text-3xl font-bold text-ink">{teacherCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 bg-accent-red rounded-lg text-primary-red">
+              <Library className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-ink/60">Active Courses</p>
+              <p className="text-3xl font-bold text-ink">{courseCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 bg-yellow-100 rounded-lg text-yellow-600">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-ink/60">Total Enrollments</p>
+              <p className="text-3xl font-bold text-ink">{enrollmentCount}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Users Table */}
-      <section className="pt-12">
-        <h2 className="font-serif text-xl mb-6">Recent Registrations</h2>
-        <div className="border border-ledger-line bg-paper">
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Registrations</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-parchment">
               <TableRow>
@@ -86,7 +109,7 @@ export default async function AdminDashboardPage() {
                     ) : user.role === 'TEACHER' ? (
                       <Badge variant="success">{user.role}</Badge>
                     ) : (
-                      <Badge variant="neutral">{user.role}</Badge>
+                      <Badge variant="default">{user.role}</Badge>
                     )}
                   </TableCell>
                   <TableCellMono className="text-right text-sm">
@@ -96,8 +119,8 @@ export default async function AdminDashboardPage() {
               ))}
             </TableBody>
           </Table>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   )
 }
