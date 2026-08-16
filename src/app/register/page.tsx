@@ -68,7 +68,7 @@ export default function RegisterPage() {
 
               <div className="space-y-2 pt-2">
                 <label className="text-sm font-medium text-ink">Account Type</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <label className="flex items-center justify-center gap-2 p-3 border border-ledger-line cursor-pointer hover:bg-accent-red has-[:checked]:border-primary-red has-[:checked]:bg-accent-red has-[:checked]:text-primary-red transition-all rounded-md text-ink/70">
                     <input type="radio" name="role" value="STUDENT" defaultChecked className="hidden" />
                     <span className="text-sm font-medium">Student</span>
@@ -77,6 +77,11 @@ export default function RegisterPage() {
                   <label className="flex items-center justify-center gap-2 p-3 border border-ledger-line cursor-pointer hover:bg-accent-red has-[:checked]:border-primary-red has-[:checked]:bg-accent-red has-[:checked]:text-primary-red transition-all rounded-md text-ink/70">
                     <input type="radio" name="role" value="TEACHER" className="hidden" />
                     <span className="text-sm font-medium">Teacher</span>
+                  </label>
+
+                  <label className="flex items-center justify-center gap-2 p-3 border border-ledger-line cursor-pointer hover:bg-accent-red has-[:checked]:border-primary-red has-[:checked]:bg-accent-red has-[:checked]:text-primary-red transition-all rounded-md text-ink/70">
+                    <input type="radio" name="role" value="ADMIN" className="hidden" />
+                    <span className="text-sm font-medium">Admin</span>
                   </label>
                 </div>
               </div>

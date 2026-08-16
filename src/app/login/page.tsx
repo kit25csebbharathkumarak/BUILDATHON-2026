@@ -13,9 +13,13 @@ export default function LoginPage() {
   
   useEffect(() => {
     if (state?.success) {
-      router.push('/dashboard')
+      if (state.role === 'ADMIN') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
     }
-  }, [state?.success, router])
+  }, [state, router])
 
   return (
     <div className="min-h-screen bg-parchment flex flex-col items-center justify-center p-4">
