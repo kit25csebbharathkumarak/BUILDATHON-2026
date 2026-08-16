@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { AdminAssignmentForm } from '../AdminAssignmentForm'
+import { AdminAssignmentForm } from '../../AdminAssignmentForm'
 import { notFound } from 'next/navigation'
 
 const prisma = new PrismaClient()
