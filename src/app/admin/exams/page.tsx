@@ -76,7 +76,7 @@ export default async function AdminExamsPage() {
                           {exam.date.toLocaleDateString()}
                         </span>
                         {!isPast && <Badge variant="warning">Upcoming</Badge>}
-                        {isPast && exam._count.results === 0 && <Badge variant="rust">Pending Grading</Badge>}
+                        {isPast && exam._count.results === 0 && <Badge variant="warning">Pending Grading</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-center">

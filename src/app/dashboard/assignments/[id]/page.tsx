@@ -21,7 +21,10 @@ export default async function AssignmentDetailsPage(props: { params: Promise<{ i
     where: { id: params.id },
     include: {
       course: true,
-      submissions: isStudent ? { where: { studentId: session.id } } : { include: { student: true } }
+      submissions: {
+        where: isStudent ? { studentId: session.id } : undefined,
+        include: { student: true }
+      }
     }
   })
 

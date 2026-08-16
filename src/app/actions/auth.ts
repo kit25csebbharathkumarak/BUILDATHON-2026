@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { setAuthCookie, clearAuthCookie } from '@/lib/auth'
 import { z } from 'zod'
+import { redirect } from 'next/navigation'
 
 const prisma = new PrismaClient()
 
@@ -104,7 +105,7 @@ export async function registerAction(prevState: any, formData: FormData) {
   }
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<void> {
   await clearAuthCookie()
-  return { success: true }
+  redirect('/login')
 }

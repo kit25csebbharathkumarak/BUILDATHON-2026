@@ -1,7 +1,20 @@
-import { PrismaClient, Role, AIInsightType } from '@prisma/client'
+import 'dotenv/config'
+import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
+
+const Role = {
+  ADMIN: 'ADMIN',
+  TEACHER: 'TEACHER',
+  STUDENT: 'STUDENT',
+} as const
+
+const AIInsightType = {
+  AT_RISK: 'AT_RISK',
+  WEAK_SUBJECT: 'WEAK_SUBJECT',
+  RECOMMENDATION: 'RECOMMENDATION',
+} as const
 
 async function main() {
   console.log('Seeding database...')

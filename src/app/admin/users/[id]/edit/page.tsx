@@ -22,7 +22,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
       </div>
 
       <div className="bg-white p-6 md:p-8 rounded-lg border border-ledger-line shadow-sm">
-        <AdminUserForm user={user} isEdit={true} />
+        <AdminUserForm user={{ ...user, role: user.role as 'STUDENT' | 'TEACHER' | 'ADMIN' }} isEdit={true} />
       </div>
     </div>
   )

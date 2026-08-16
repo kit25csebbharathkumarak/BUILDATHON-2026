@@ -8,7 +8,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   try {
     const student = await prisma.user.findUnique({
-      where: { id, role: 'student' },
+      where: { id },
       include: {
         enrollments: {
           include: {
@@ -17,13 +17,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         },
         grades: {
           include: {
-            assignment: true,
+            course: true,
           }
         }
       }
     });
 
-    if (!student) {
+    if (!student || student.role !== 'STUDENT') {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
