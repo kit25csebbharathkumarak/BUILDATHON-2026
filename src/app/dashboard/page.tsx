@@ -21,11 +21,45 @@ export default async function DashboardPage() {
     attendanceRate: 100,
   }
 
+  let recentActivity: any[] = []
+
   if (isStudent) {
-    stats.courses = await prisma.enrollment.count({ where: { userId: session.id } })
-    // Mock other stats for UI purposes
-    stats.assignmentsPending = 3
-    stats.attendanceRate = 92
+    const enrollments = await prisma.enrollment.findMany({
+      where: { userId: session.id },
+      select: { courseId: true }
+    })
+    const courseIds = enrollments.map(e => e.courseId)
+    stats.courses = courseIds.length
+
+    // Calculate pending assignments
+    const totalAssignments = await prisma.assignment.count({
+      where: { courseId: { in: courseIds } }
+    })
+    const submittedAssignments = await prisma.submission.count({
+      where: { studentId: session.id }
+    })
+    stats.assignmentsPending = Math.max(0, totalAssignments - submittedAssignments)
+
+    // Calculate attendance rate
+    const totalAttendance = await prisma.attendance.count({
+      where: { studentId: session.id }
+    })
+    const presentAttendance = await prisma.attendance.count({
+      where: { studentId: session.id, status: 'PRESENT' }
+    })
+    stats.attendanceRate = totalAttendance > 0 ? Math.round((presentAttendance / totalAttendance) * 100) : 100
+
+    // Fetch recent submissions
+    const submissions = await prisma.submission.findMany({
+      where: { studentId: session.id },
+      include: { assignment: true },
+      take: 3
+    })
+    recentActivity = submissions.map(s => ({
+      title: `Assignment Graded: ${s.assignment.title}`,
+      time: 'Recently'
+    }))
+
   } else {
     stats.courses = await prisma.class.count({ where: { teacherId: session.id } })
     stats.assignmentsPending = 12 // assignments to grade
@@ -85,15 +119,17 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
+              {recentActivity.length > 0 ? recentActivity.map((activity, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="w-2 h-2 mt-2 rounded-full bg-primary-red"></div>
                   <div>
-                    <p className="text-sm font-medium text-ink">Assignment Graded: Physics Midterm</p>
-                    <p className="text-xs text-ink/60 mt-1">2 hours ago</p>
+                    <p className="text-sm font-medium text-ink">{activity.title}</p>
+                    <p className="text-xs text-ink/60 mt-1">{activity.time}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="text-sm text-ink/60">No recent activity found.</div>
+              )}
             </div>
           </CardContent>
         </Card>
