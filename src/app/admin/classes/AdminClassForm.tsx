@@ -3,8 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
-import { Label } from '@/components/ui/Label'
-import { Input } from '@/components/ui/Input'
 import { createClassAction, updateClassAction, deleteClassAction } from '@/app/actions/classes'
 import { Loader2, Trash2 } from 'lucide-react'
 
@@ -87,19 +85,20 @@ export function AdminClassForm({ initialData, courses, teachers, students, isEdi
 
       <form action={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="name">Class Name</Label>
-          <Input 
+          <label htmlFor="name" className="text-sm font-medium text-ink">Class Name</label>
+          <input 
             id="name" 
             name="name" 
             defaultValue={initialData?.name} 
             placeholder="e.g. Fall 2026 - Section A" 
             required 
+            className="w-full px-4 py-2 border border-ledger-line bg-paper text-ink rounded-md focus:outline-none focus:ring-1 focus:ring-primary-red"
           />
         </div>
 
         <div className="grid sm:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="courseId">Course</Label>
+            <label htmlFor="courseId" className="text-sm font-medium text-ink">Course</label>
             <select 
               id="courseId" 
               name="courseId" 
@@ -115,7 +114,7 @@ export function AdminClassForm({ initialData, courses, teachers, students, isEdi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="teacherId">Instructor (Teacher)</Label>
+            <label htmlFor="teacherId" className="text-sm font-medium text-ink">Instructor (Teacher)</label>
             <select 
               id="teacherId" 
               name="teacherId" 
@@ -133,7 +132,7 @@ export function AdminClassForm({ initialData, courses, teachers, students, isEdi
 
         <div className="space-y-3 pt-4 border-t border-ledger-line">
           <div className="flex justify-between items-center">
-            <Label>Enroll Students</Label>
+            <label className="text-sm font-medium text-ink">Enroll Students</label>
             <span className="text-xs font-semibold text-primary-red bg-accent-red px-2 py-1 rounded">
               {selectedStudents.size} Selected
             </span>
