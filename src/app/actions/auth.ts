@@ -42,6 +42,7 @@ export async function loginAction(prevState: any, formData: FormData) {
       await import('@/lib/auth').then((m) =>
         m.signToken({
           id: user.id,
+          name: user.name,
           email: user.email,
           role: user.role,
         })
@@ -86,6 +87,7 @@ export async function registerAction(prevState: any, formData: FormData) {
       await import('@/lib/auth').then((m) =>
         m.signToken({
           id: user.id,
+          name: user.name,
           email: user.email,
           role: user.role,
         })

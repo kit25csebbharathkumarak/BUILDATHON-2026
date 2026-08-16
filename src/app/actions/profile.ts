@@ -1,7 +1,7 @@
 'use server'
 
 import { PrismaClient } from '@prisma/client'
-import { getSession } from '@/lib/auth'
+import { getSession, setAuthCookie } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
 const prisma = new PrismaClient()
@@ -21,6 +21,14 @@ export async function updateProfileInfo(prevState: any, formData: FormData) {
       where: { id: session.id },
       data: { name: name.trim() }
     })
+
+    // Re-sign token with new name
+    const authModule = await import('@/lib/auth')
+    const newToken = await authModule.signToken({
+      ...session,
+      name: name.trim()
+    })
+    await setAuthCookie(newToken)
 
     revalidatePath('/dashboard/profile')
     return { success: 'Profile updated successfully' }
