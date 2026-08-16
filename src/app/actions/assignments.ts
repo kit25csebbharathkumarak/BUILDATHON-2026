@@ -68,3 +68,46 @@ export async function submitAssignmentAction(assignmentId: string, prevState: an
     return { error: 'Failed to submit assignment.' }
   }
 }
+
+export async function createAssignmentAction(prevState: any, formData: FormData) {
+  try {
+    const session = await getSession()
+    if (!session || (session.role !== 'TEACHER' && session.role !== 'ADMIN')) {
+      return { error: 'Unauthorized' }
+    }
+
+    const title = formData.get('title') as string
+    const description = formData.get('description') as string
+    const dueDate = formData.get('dueDate') as string
+    const courseId = formData.get('courseId') as string
+
+    if (!title || !description || !dueDate || !courseId) {
+      return { error: 'All fields are required.' }
+    }
+
+    // Verify teacher owns the course
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    })
+
+    if (!course || course.teacherId !== session.id) {
+      return { error: 'Invalid course selection.' }
+    }
+
+    await prisma.assignment.create({
+      data: {
+        title,
+        description,
+        dueDate: new Date(dueDate),
+        courseId
+      }
+    })
+
+    revalidatePath('/dashboard/assignments')
+    return { success: 'Assignment created successfully!' }
+
+  } catch (error) {
+    console.error('Create assignment error:', error)
+    return { error: 'Failed to create assignment.' }
+  }
+}

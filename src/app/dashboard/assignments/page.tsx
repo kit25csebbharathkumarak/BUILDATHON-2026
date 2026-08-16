@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Card, CardContent } from '@/components/ui/Card'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { CreateAssignmentDialog } from './CreateAssignmentDialog'
 
 const prisma = new PrismaClient()
 
@@ -19,6 +20,7 @@ export default async function AssignmentsPage() {
   const isStudent = session.role === 'STUDENT'
 
   let assignments: any[] = []
+  let teacherCourses: any[] = []
 
   if (isStudent) {
     const enrollments = await prisma.enrollment.findMany({
@@ -39,11 +41,11 @@ export default async function AssignmentsPage() {
       orderBy: { dueDate: 'asc' }
     })
   } else {
-    const classes = await prisma.class.findMany({
+    teacherCourses = await prisma.course.findMany({
       where: { teacherId: session.id },
-      select: { courseId: true }
+      select: { id: true, title: true }
     })
-    const courseIds = classes.map(c => c.courseId)
+    const courseIds = teacherCourses.map(c => c.id)
     
     assignments = await prisma.assignment.findMany({
       where: { courseId: { in: courseIds } },
@@ -57,11 +59,16 @@ export default async function AssignmentsPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-ink">Assignments</h1>
-        <p className="text-ink/60 mt-2">
-          {isStudent ? 'Track your upcoming and past due work.' : 'Manage coursework and grading.'}
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-ink">Assignments</h1>
+          <p className="text-ink/60 mt-2">
+            {isStudent ? 'Track your upcoming and past due work.' : 'Manage coursework and grading.'}
+          </p>
+        </div>
+        {!isStudent && (
+          <CreateAssignmentDialog courses={teacherCourses} />
+        )}
       </div>
 
       {assignments.length === 0 ? (
