@@ -9,25 +9,45 @@ const prisma = new PrismaClient()
 export default async function ProgressPage() {
   const session = await getSession()
 
-  if (!session || session.role !== 'STUDENT') {
+  if (!session) {
     redirect('/login')
   }
 
-  const aiInsights = await prisma.aIInsight.findMany({
-    where: { userId: session.id },
-    orderBy: { generatedAt: 'desc' },
-    take: 3
-  })
+  const isStudent = session.role === 'STUDENT'
 
-  // Mock data for the mastery chart
-  const masteryPercentage = 78
+  let aiInsights: any[] = []
+  let masteryPercentage = 78
+  let teacherCourses: any[] = []
+
+  if (isStudent) {
+    aiInsights = await prisma.aIInsight.findMany({
+      where: { userId: session.id },
+      orderBy: { generatedAt: 'desc' },
+      take: 3
+    })
+  } else {
+    teacherCourses = await prisma.course.findMany({
+      where: { teacherId: session.id },
+      include: {
+        _count: { select: { enrollments: true } },
+        enrollments: true
+      }
+    })
+    
+    const allProgress = teacherCourses.flatMap(c => c.enrollments.map((e: any) => e.progress))
+    if (allProgress.length > 0) {
+      masteryPercentage = Math.round(allProgress.reduce((a, b) => a + b, 0) / allProgress.length)
+    } else {
+      masteryPercentage = 0
+    }
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-ink">Academic Mastery</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">{isStudent ? 'Academic Mastery' : 'Class Mastery'}</h1>
         <p className="text-ink/60 mt-2">
-          Comprehensive analysis of your current standing.
+          {isStudent ? 'Comprehensive analysis of your current standing.' : 'Aggregate performance metrics across all your classes.'}
         </p>
       </div>
 
@@ -67,69 +87,93 @@ export default async function ProgressPage() {
         <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Subject Breakdown</CardTitle>
+              <CardTitle>{isStudent ? 'Subject Breakdown' : 'Class Breakdown'}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <table className="w-full text-sm text-left">
                 <thead className="bg-parchment border-y border-ledger-line">
                   <tr>
                     <th className="p-4 font-medium text-ink/70">Course</th>
-                    <th className="p-4 font-medium text-ink/70 w-[100px]">Score</th>
-                    <th className="p-4 font-medium text-ink/70 w-[100px]">Status</th>
+                    <th className="p-4 font-medium text-ink/70 w-[100px]">{isStudent ? 'Score' : 'Avg Score'}</th>
+                    <th className="p-4 font-medium text-ink/70 w-[100px]">{isStudent ? 'Status' : 'Students'}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-ledger-line">
-                    <td className="p-4 font-medium">Introduction to Computer Science</td>
-                    <td className="p-4 font-bold text-green-600">94%</td>
-                    <td className="p-4 text-xs font-bold text-green-600 uppercase">Excellent</td>
-                  </tr>
-                  <tr className="border-b border-ledger-line">
-                    <td className="p-4 font-medium">Data Structures & Algorithms</td>
-                    <td className="p-4 font-bold text-ink">78%</td>
-                    <td className="p-4 text-xs font-bold text-ink/70 uppercase">Average</td>
-                  </tr>
-                  <tr className="border-b border-ledger-line">
-                    <td className="p-4 font-medium">Advanced Calculus</td>
-                    <td className="p-4 font-bold text-red-600">62%</td>
-                    <td className="p-4 text-xs font-bold text-red-600 uppercase">At Risk</td>
-                  </tr>
+                  {isStudent ? (
+                    <>
+                      <tr className="border-b border-ledger-line">
+                        <td className="p-4 font-medium">Introduction to Computer Science</td>
+                        <td className="p-4 font-bold text-green-600">94%</td>
+                        <td className="p-4 text-xs font-bold text-green-600 uppercase">Excellent</td>
+                      </tr>
+                      <tr className="border-b border-ledger-line">
+                        <td className="p-4 font-medium">Data Structures & Algorithms</td>
+                        <td className="p-4 font-bold text-ink">78%</td>
+                        <td className="p-4 text-xs font-bold text-ink/70 uppercase">Average</td>
+                      </tr>
+                      <tr className="border-b border-ledger-line">
+                        <td className="p-4 font-medium">Advanced Calculus</td>
+                        <td className="p-4 font-bold text-red-600">62%</td>
+                        <td className="p-4 text-xs font-bold text-red-600 uppercase">At Risk</td>
+                      </tr>
+                    </>
+                  ) : (
+                    teacherCourses.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="p-4 text-center text-ink/50">No classes assigned yet.</td>
+                      </tr>
+                    ) : (
+                      teacherCourses.map(course => {
+                        const classProgress = course.enrollments.map((e: any) => e.progress)
+                        const avg = classProgress.length > 0 ? Math.round(classProgress.reduce((a: number, b: number) => a + b, 0) / classProgress.length) : 0
+                        return (
+                          <tr key={course.id} className="border-b border-ledger-line">
+                            <td className="p-4 font-medium">{course.title}</td>
+                            <td className="p-4 font-bold text-ink">{avg}%</td>
+                            <td className="p-4 font-medium text-ink/70">{course._count.enrollments}</td>
+                          </tr>
+                        )
+                      })
+                    )
+                  )}
                 </tbody>
               </table>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Diagnostics Log</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {aiInsights.length > 0 ? (
-                  aiInsights.map((insight) => (
-                    <MarginaliaNote 
-                      key={insight.id}
-                      tone={insight.type === 'AT_RISK' ? 'warning' : insight.type === 'RECOMMENDATION' ? 'success' : 'insight'}
-                    >
-                      <div className="mb-1 flex justify-between items-center w-full gap-4">
-                        <span className="font-bold text-xs uppercase tracking-wider opacity-80">
-                          {insight.type === 'AT_RISK' ? 'Intervention Required' : insight.type === 'RECOMMENDATION' ? 'Suggestion' : 'Observation'}
-                        </span>
-                        <span className="text-xs opacity-50">{insight.generatedAt.toLocaleDateString()}</span>
-                      </div>
-                      <p className="text-sm">
-                        {insight.content}
-                      </p>
-                    </MarginaliaNote>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-sm text-ink/50">
-                    No diagnostic data generated for this term yet.
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {isStudent && (
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Diagnostics Log</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {aiInsights.length > 0 ? (
+                    aiInsights.map((insight) => (
+                      <MarginaliaNote 
+                        key={insight.id}
+                        tone={insight.type === 'AT_RISK' ? 'warning' : insight.type === 'RECOMMENDATION' ? 'success' : 'insight'}
+                      >
+                        <div className="mb-1 flex justify-between items-center w-full gap-4">
+                          <span className="font-bold text-xs uppercase tracking-wider opacity-80">
+                            {insight.type === 'AT_RISK' ? 'Intervention Required' : insight.type === 'RECOMMENDATION' ? 'Suggestion' : 'Observation'}
+                          </span>
+                          <span className="text-xs opacity-50">{insight.generatedAt.toLocaleDateString()}</span>
+                        </div>
+                        <p className="text-sm">
+                          {insight.content}
+                        </p>
+                      </MarginaliaNote>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-sm text-ink/50">
+                      No diagnostic data generated for this term yet.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
