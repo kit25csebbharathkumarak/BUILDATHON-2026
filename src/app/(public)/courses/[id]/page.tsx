@@ -1,63 +1,111 @@
-export default async function CourseDetails({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+export default async function CourseDetailsPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params
   
+  const course = await prisma.course.findUnique({
+    where: { id: params.id },
+    include: {
+      teacher: true,
+      _count: {
+        select: { enrollments: true, classes: true, assignments: true }
+      }
+    }
+  })
+
+  if (!course) {
+    notFound()
+  }
+
   return (
-    <div className="container py-12 animate-fade-in">
-      <div className="card mb-8 bg-gradient-to-r from-primary-light to-white">
-        <div className="max-w-3xl">
-          <span className="badge badge-primary mb-4">Computer Science</span>
-          <h1 className="text-4xl font-bold mb-4">Advanced Machine Learning (Course {id})</h1>
-          <p className="text-xl text-muted mb-6">Master neural networks and deep learning with real-world projects. Learn how to build AI models from scratch.</p>
-          <div className="flex gap-4">
-            <button className="btn btn-primary">Enroll Now - $99</button>
-            <button className="btn btn-outline">View Syllabus</button>
+    <div className="py-16 md:py-24">
+      {/* Header */}
+      <div className="border-b border-ink pb-12 mb-12">
+        <div className="flex items-center gap-4 mb-6 font-mono text-sm text-ink/70 uppercase">
+          <span>{course.category}</span>
+          <span>•</span>
+          <span>Rating {course.rating.toFixed(1)}</span>
+        </div>
+        <h1 className="font-serif text-4xl md:text-6xl font-light leading-tight mb-8">
+          {course.title}
+        </h1>
+        <p className="text-xl text-ink/80 max-w-3xl leading-relaxed font-sans mb-10">
+          {course.description}
+        </p>
+        
+        <div className="flex items-center gap-8 border-t border-ledger-line pt-6 font-mono text-sm">
+          <div>
+            <span className="text-ink/50 block mb-1">Instructor</span>
+            <span className="font-semibold">{course.teacher.name}</span>
+          </div>
+          <div>
+            <span className="text-ink/50 block mb-1">Enrollment</span>
+            <span className="font-semibold">{course._count.enrollments} Students</span>
+          </div>
+          <div>
+            <span className="text-ink/50 block mb-1">Assignments</span>
+            <span className="font-semibold">{course._count.assignments} Required</span>
           </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
-          <section>
-            <h2 className="text-2xl font-bold mb-4">About This Course</h2>
-            <p className="text-muted">This course will take you from the basics of machine learning to advanced deep learning architectures. We cover everything from linear regression to transformers and LLMs.</p>
+      <div className="grid lg:grid-cols-3 gap-16">
+        {/* Main Content */}
+        <div className="lg:col-span-2">
+          <section className="mb-16">
+            <h2 className="font-serif text-2xl mb-6 border-b border-ledger-line pb-2">Learning Objectives</h2>
+            <ul className="list-disc list-inside space-y-3 text-ink/80 font-sans">
+              <li>Master the core concepts of the subject</li>
+              <li>Apply knowledge to real-world scenarios</li>
+              <li>Understand advanced methodologies</li>
+              <li>Build a comprehensive final project</li>
+              <li>Prepare for industry certifications</li>
+            </ul>
           </section>
           
           <section>
-            <h2 className="text-2xl font-bold mb-4">Syllabus</h2>
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((week) => (
-                <div key={week} className="card p-4">
-                  <h3 className="font-bold mb-2">Week {week}: Core Concepts</h3>
-                  <p className="text-sm text-muted">Introduction to the fundamental theories and mathematics behind the models.</p>
-                </div>
+            <h2 className="font-serif text-2xl mb-6 border-b border-ledger-line pb-2">Course Syllabus</h2>
+            <ol className="list-decimal list-outside ml-5 space-y-8 font-sans text-ink/90">
+              {[1, 2, 3, 4].map((module) => (
+                <li key={module} className="pl-4 border-l border-ledger-line ml-4 pb-2">
+                  <h3 className="font-semibold text-lg mb-2">Module {module}: Core Fundamentals</h3>
+                  <p className="text-ink/70 mb-4">Detailed introduction to the basic principles and terminology used throughout this academic section.</p>
+                  <div className="flex items-center gap-6 font-mono text-xs text-ink/50 bg-parchment p-3 rounded-[2px] border border-ledger-line inline-flex">
+                    <span>3 Lessons</span>
+                    <span>1 Assignment</span>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ol>
           </section>
         </div>
 
-        <div className="space-y-6">
-          <div className="card">
-            <h3 className="font-bold mb-4">Course Info</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="flex justify-between"><span className="text-muted">Level</span> <span>Advanced</span></li>
-              <li className="flex justify-between"><span className="text-muted">Duration</span> <span>12 Weeks</span></li>
-              <li className="flex justify-between"><span className="text-muted">Lessons</span> <span>48</span></li>
-              <li className="flex justify-between"><span className="text-muted">Certificate</span> <span>Yes</span></li>
-            </ul>
-          </div>
-          
-          <div className="card">
-            <h3 className="font-bold mb-4">Instructor</h3>
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary-light rounded-full"></div>
-              <div>
-                <div className="font-bold">Dr. Alan Turing</div>
-                <div className="text-sm text-muted">AI Researcher</div>
-              </div>
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-24 bg-paper border border-ledger-line rounded-[2px] p-8 shadow-sm">
+            <div className="font-mono text-3xl mb-8">
+              {course.price === 0 ? 'FREE' : `$${course.price.toFixed(2)}`}
             </div>
+            
+            <Link href={`/login?from=/dashboard`} className="block w-full bg-ink text-paper text-center py-3 rounded-[2px] font-medium hover:bg-ink/90 transition-colors mb-6">
+              Enroll in Course
+            </Link>
+            
+            <hr className="border-ledger-line mb-6" />
+            
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Requirements</h4>
+            <ul className="space-y-3 text-sm text-ink/70 font-sans">
+              <li>No prior experience required</li>
+              <li>Basic computer literacy</li>
+              <li>Dedication to complete all modules</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

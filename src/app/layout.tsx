@@ -1,5 +1,25 @@
 import type { Metadata } from 'next';
+import { Fraunces, Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const plexMono = IBM_Plex_Mono({
+  weight: ['400', '500', '600'],
+  subsets: ['latin'],
+  variable: '--font-plex-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'EduPortal AI',
@@ -12,8 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
+      <body className="antialiased font-sans bg-parchment text-ink min-h-screen">
+        {children}
+      </body>
     </html>
   );
 }

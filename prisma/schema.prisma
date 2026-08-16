@@ -3,8 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
 }
 
 model User {
@@ -12,10 +18,16 @@ model User {
   name        String
   email       String       @unique
   password    String
-  role        String       // 'student', 'teacher', 'admin'
+  role        Role         @default(STUDENT)
   createdAt   DateTime     @default(now())
   enrollments Enrollment[]
   grades      Grade[]
+  classes     Class[]      @relation("TeacherClasses")
+  coursesTaught Course[]   @relation("TeacherCourses")
+  submissions Submission[]
+  aiInsights  AIInsight[]
+  attendances Attendance[]
+  examResults ExamResult[]
 }
 
 model Course {
@@ -26,8 +38,22 @@ model Course {
   price       Float        @default(0.0)
   rating      Float        @default(0.0)
   teacherId   String
+  teacher     User         @relation("TeacherCourses", fields: [teacherId], references: [id], onDelete: Cascade)
   enrollments Enrollment[]
   assignments Assignment[]
+  classes     Class[]
+  exams       Exam[]
+  grades      Grade[]
+}
+
+model Class {
+  id          String       @id @default(cuid())
+  name        String       // e.g. "Section A", "Fall 2026"
+  courseId    String
+  teacherId   String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User         @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
 }
 
 model Enrollment {
@@ -41,14 +67,63 @@ model Enrollment {
   @@unique([userId, courseId])
 }
 
-model Assignment {
+model Attendance {
   id        String   @id @default(cuid())
-  title     String
-  type      String   // 'Quiz', 'Project'
-  dueDate   DateTime
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  grades    Grade[]
+  studentId String
+  classId   String
+  date      DateTime
+  status    String   // 'PRESENT', 'ABSENT', 'LATE'
+  
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId, date])
+}
+
+model Assignment {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  dueDate     DateTime
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+}
+
+model Submission {
+  id           String     @id @default(cuid())
+  assignmentId String
+  studentId    String
+  content      String
+  aiFeedback   String?
+  grade        Float?
+  
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@unique([assignmentId, studentId])
+}
+
+model Exam {
+  id          String       @id @default(cuid())
+  title       String
+  date        DateTime
+  courseId    String
+  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  results     ExamResult[]
+}
+
+model ExamResult {
+  id        String   @id @default(cuid())
+  examId    String
+  studentId String
+  score     Float
+  analysis  String?  // AI generated analysis for this exam
+  
+  exam      Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@unique([examId, studentId])
 }
 
 model Grade {
@@ -56,7 +131,33 @@ model Grade {
   score        Float
   feedback     String?
   userId       String
-  assignmentId String
+  courseId     String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, courseId])
+}
+
+enum AIInsightType {
+  AT_RISK
+  WEAK_SUBJECT
+  RECOMMENDATION
+}
+
+model AIInsight {
+  id          String        @id @default(cuid())
+  userId      String
+  type        AIInsightType
+  content     String
+  generatedAt DateTime      @default(now())
+  
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  userId      String?  // Optional: if null, it's an admin/platform-wide report
+  generatedAt DateTime @default(now())
 }

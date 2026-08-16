@@ -1,53 +1,99 @@
-import Link from 'next/link';
-import { PrismaClient } from '@prisma/client';
+import Link from 'next/link'
+import { PrismaClient } from '@prisma/client'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCellMono } from '@/components/ui/DataTable'
+import { EmptyState } from '@/components/ui/EmptyState'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
-export default async function Courses() {
+export default async function CoursesPage(props: { searchParams: Promise<{ q?: string }> }) {
+  const searchParams = await props.searchParams
+  const query = searchParams.q || ''
+
   const courses = await prisma.course.findMany({
-    include: {
-      _count: {
-        select: { enrollments: true }
-      }
-    }
-  });
+    where: {
+      OR: [
+        { title: { contains: query } },
+        { description: { contains: query } },
+        { category: { contains: query } },
+      ],
+    },
+    include: { teacher: true },
+    orderBy: { rating: 'desc' }
+  })
 
   return (
-    <div className="container py-12 animate-fade-in">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Browse Courses</h1>
-        <div className="flex gap-4">
-          <input 
-            type="text" 
-            placeholder="Search courses..." 
-            className="p-2 border border-glass-border rounded-md bg-surface-hover focus:outline-none focus:border-primary"
-          />
-          <select className="p-2 border border-glass-border rounded-md bg-surface-hover focus:outline-none focus:border-primary">
-            <option>All Categories</option>
-            <option>Computer Science</option>
-            <option>Business</option>
-            <option>Arts</option>
-          </select>
-        </div>
+    <div className="py-16 md:py-24">
+      <div className="border-b border-ink pb-8 mb-12">
+        <h1 className="font-serif text-4xl md:text-5xl font-light mb-4">Course Ledger</h1>
+        <p className="text-lg text-ink/70 max-w-2xl font-sans">
+          Browse our complete academic offering.
+        </p>
       </div>
       
-      <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="card p-0 overflow-hidden flex flex-col">
-            <div className="h-40 bg-primary-light"></div>
-            <div className="p-4 flex-1 flex flex-col">
-              <span className="text-xs text-primary font-bold mb-1 uppercase">{course.category}</span>
-              <h3 className="font-bold mb-2">{course.title}</h3>
-              <p className="text-sm text-muted mb-4 flex-1">{course.description}</p>
-              <div className="text-xs text-muted mb-4">{course._count.enrollments} Students Enrolled</div>
-              <div className="flex justify-between items-center mt-auto">
-                <span className="font-bold">${course.price}</span>
-                <Link href={`/courses/${course.id}`} className="btn btn-outline text-sm px-3 py-1">Details</Link>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="mb-8">
+        <form className="flex max-w-md" action="/courses" method="GET">
+          <input
+            type="search"
+            name="q"
+            defaultValue={query}
+            placeholder="Search catalog..."
+            className="flex-1 bg-paper border border-ledger-line rounded-l-[2px] px-4 py-2 text-sm focus:outline-none focus:border-marigold"
+          />
+          <button type="submit" className="bg-ink text-paper px-6 py-2 rounded-r-[2px] text-sm font-medium hover:bg-ink/90 transition-colors">
+            Search
+          </button>
+        </form>
       </div>
+
+      {query && (
+        <div className="font-mono text-sm mb-6 text-ink/70">
+          FILTER: "{query}" — {courses.length} matches
+        </div>
+      )}
+
+      {courses.length === 0 ? (
+        <EmptyState 
+          title="No courses found" 
+          description="We couldn't find any courses matching your search criteria." 
+        />
+      ) : (
+        <div className="bg-paper border border-ledger-line shadow-sm rounded-[2px] overflow-hidden">
+          <Table>
+            <TableHeader className="bg-parchment">
+              <TableRow>
+                <TableHead className="w-[120px]">Code / Category</TableHead>
+                <TableHead>Course Title</TableHead>
+                <TableHead>Instructor</TableHead>
+                <TableHead className="text-right">Rating</TableHead>
+                <TableHead className="w-[100px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {courses.map(course => (
+                <TableRow key={course.id}>
+                  <TableCellMono className="text-ink/60 uppercase text-xs">
+                    {course.category.substring(0,3)}-{course.id.substring(course.id.length-4)}
+                  </TableCellMono>
+                  <TableCell className="font-medium text-base">
+                    {course.title}
+                  </TableCell>
+                  <TableCell>
+                    {course.teacher.name}
+                  </TableCell>
+                  <TableCellMono className="text-right">
+                    {course.rating.toFixed(1)}
+                  </TableCellMono>
+                  <TableCell className="text-right">
+                    <Link href={`/courses/${course.id}`} className="text-sm font-medium hover:text-marigold border-b border-transparent hover:border-marigold transition-all">
+                      View
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
-  );
+  )
 }

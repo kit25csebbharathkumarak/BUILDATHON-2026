@@ -1,73 +1,108 @@
-'use server';
+'use server'
 
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-import { createSession, deleteSession } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+import { setAuthCookie, clearAuthCookie } from '@/lib/auth'
+import { z } from 'zod'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
-export async function loginUser(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+})
 
-  if (!email || !password) {
-    return { error: 'Email and password are required' };
-  }
+const registerSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.enum(['STUDENT', 'TEACHER']),
+})
 
-  const user = await prisma.user.findUnique({ where: { email } });
+export async function loginAction(prevState: any, formData: FormData) {
+  try {
+    const rawData = Object.fromEntries(formData.entries())
+    const validatedData = loginSchema.parse(rawData)
 
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return { error: 'Invalid email or password' };
-  }
+    const user = await prisma.user.findUnique({
+      where: { email: validatedData.email },
+    })
 
-  await createSession(user.id, user.role, user.email);
-  
-  if (user.role === 'admin') {
-    redirect('/admin/dashboard');
-  } else if (user.role === 'teacher') {
-    redirect('/teacher/dashboard');
-  } else {
-    redirect('/student/dashboard');
-  }
-}
+    if (!user) {
+      return { error: 'Invalid credentials' }
+    }
 
-export async function registerUser(formData: FormData) {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-  const role = formData.get('role') as string; // 'student' or 'teacher'
+    const isPasswordValid = await bcrypt.compare(validatedData.password, user.password)
 
-  if (!name || !email || !password || !role) {
-    return { error: 'All fields are required' };
-  }
+    if (!isPasswordValid) {
+      return { error: 'Invalid credentials' }
+    }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    return { error: 'Email already in use' };
-  }
+    await setAuthCookie(
+      await import('@/lib/auth').then((m) =>
+        m.signToken({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        })
+      )
+    )
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-    },
-  });
-
-  await createSession(user.id, user.role, user.email);
-
-  if (user.role === 'teacher') {
-    redirect('/teacher/dashboard');
-  } else {
-    redirect('/student/dashboard');
+    return { success: true, role: user.role }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: 'Validation failed' }
+    }
+    console.error(error)
+    return { error: 'An unexpected error occurred' }
   }
 }
 
-export async function logoutUser() {
-  await deleteSession();
-  redirect('/');
+export async function registerAction(prevState: any, formData: FormData) {
+  try {
+    const rawData = Object.fromEntries(formData.entries())
+    const validatedData = registerSchema.parse(rawData)
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: validatedData.email },
+    })
+
+    if (existingUser) {
+      return { error: 'Email already exists' }
+    }
+
+    const hashedPassword = await bcrypt.hash(validatedData.password, 10)
+
+    const user = await prisma.user.create({
+      data: {
+        name: validatedData.name,
+        email: validatedData.email,
+        password: hashedPassword,
+        role: validatedData.role,
+      },
+    })
+
+    await setAuthCookie(
+      await import('@/lib/auth').then((m) =>
+        m.signToken({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        })
+      )
+    )
+
+    return { success: true, role: user.role }
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { error: 'Validation failed' }
+    }
+    console.error(error)
+    return { error: 'An unexpected error occurred' }
+  }
+}
+
+export async function logoutAction() {
+  await clearAuthCookie()
+  return { success: true }
 }

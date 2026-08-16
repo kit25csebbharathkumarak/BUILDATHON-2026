@@ -1,73 +1,58 @@
-import { jwtVerify, SignJWT } from 'jose';
-import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
+import { jwtVerify, SignJWT } from 'jose'
+import { cookies } from 'next/headers'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_for_development_only';
-const encodedKey = new TextEncoder().encode(JWT_SECRET);
-
-export interface SessionPayload {
-  userId: string;
-  role: string;
-  email: string;
-  expiresAt: Date;
+const getSecretKey = () => {
+  const secret = process.env.JWT_SECRET || 'default-super-secret-key-for-dev-only'
+  return new TextEncoder().encode(secret)
 }
 
-export async function encrypt(payload: SessionPayload) {
-  return new SignJWT(payload as any)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(encodedKey);
+export type TokenPayload = {
+  id: string
+  email: string
+  role: string
 }
 
-export async function decrypt(session: string | undefined = '') {
+export async function signToken(payload: TokenPayload): Promise<string> {
+  const iat = Math.floor(Date.now() / 1000)
+  const exp = iat + 60 * 60 * 24 // 24 hours
+
+  return new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+    .setExpirationTime(exp)
+    .setIssuedAt(iat)
+    .setNotBefore(iat)
+    .sign(getSecretKey())
+}
+
+export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ['HS256'],
-    });
-    return payload as unknown as SessionPayload;
+    const { payload } = await jwtVerify(token, getSecretKey())
+    return payload as TokenPayload
   } catch (error) {
-    return null;
+    return null
   }
 }
 
-export async function createSession(userId: string, role: string, email: string) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-  const session = await encrypt({ userId, role, email, expiresAt });
-
-  (await cookies()).set('session', session, {
+export async function setAuthCookie(token: string) {
+  const cookieStore = await cookies()
+  cookieStore.set('auth_token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    expires: expiresAt,
     sameSite: 'lax',
+    maxAge: 60 * 60 * 24, // 24 hours
     path: '/',
-  });
+  })
 }
 
-export async function deleteSession() {
-  (await cookies()).delete('session');
+export async function clearAuthCookie() {
+  const cookieStore = await cookies()
+  cookieStore.delete('auth_token')
 }
 
-export async function getSession() {
-  const session = (await cookies()).get('session')?.value;
-  if (!session) return null;
-  return await decrypt(session);
-}
-
-export async function updateSession(request: NextRequest) {
-  const session = request.cookies.get('session')?.value;
-  const payload = await decrypt(session);
-
-  if (!session || !payload) {
-    return null;
-  }
-
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+export async function getSession(): Promise<TokenPayload | null> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth_token')?.value
   
-  const res = new Response();
-  res.headers.append(
-    'Set-Cookie',
-    `session=${session}; HttpOnly; Path=/; SameSite=Lax; Expires=${expiresAt.toUTCString()}`
-  );
-  return res;
+  if (!token) return null
+  return await verifyToken(token)
 }

@@ -1,90 +1,95 @@
-import Link from 'next/link';
-import { ArrowRight, Sparkles, BookOpen, Users, Star } from 'lucide-react';
+import Link from 'next/link'
+import { PrismaClient } from '@prisma/client'
+import { MarginaliaNote } from '@/components/ui/MarginaliaNote'
 
-export default function Home() {
+const prisma = new PrismaClient()
+
+export default async function HomePage() {
+  const featuredCourses = await prisma.course.findMany({
+    take: 5,
+    orderBy: { rating: 'desc' },
+    include: { teacher: true }
+  })
+
   return (
-    <div>
+    <div className="flex flex-col w-full py-16 md:py-24">
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-light to-secondary opacity-10 z-0"></div>
-        <div className="container relative z-10 text-center animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Master Your Future with <br/><span className="text-primary">AI-Powered Learning</span>
+      <section className="relative w-full mb-32">
+        <div className="max-w-3xl">
+          <h1 className="font-serif text-5xl md:text-7xl font-light text-ink leading-tight mb-8">
+            The ledger that learns with you.
           </h1>
-          <p className="text-xl text-muted max-w-2xl mx-auto mb-8">
-            Experience personalized education, smart insights, and interactive courses designed to help you succeed faster and smarter.
+          <p className="text-xl text-ink/80 max-w-2xl leading-relaxed mb-10 font-sans">
+            EduAI is a precision-grade academic platform. Track coursework, automate administration, and receive intelligent insights directly in the margins of your academic record.
           </p>
-          <div className="flex justify-center gap-4">
-            <Link href="/courses" className="btn btn-primary btn-lg">Explore Courses <ArrowRight size={20} /></Link>
-            <Link href="/login" className="btn btn-outline btn-lg">Join for Free</Link>
+          <div className="flex gap-4">
+            <Link href="/register" className="bg-ink text-paper px-8 py-3 rounded-[2px] font-medium hover:bg-ink/90 transition-colors">
+              Start Learning
+            </Link>
+            <Link href="/courses" className="border border-ledger-line text-ink px-8 py-3 rounded-[2px] font-medium hover:bg-ledger-line/30 transition-colors">
+              View Catalog
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* AI Features Highlight */}
-      <section className="py-16 bg-surface">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold">Why Choose EduPortal AI?</h2>
-            <p className="text-muted mt-2">Our AI engine adapts to your learning style.</p>
+      {/* Signature AI Feature */}
+      <section className="mb-32">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="font-serif text-3xl mb-6">Annotations, not chatbots.</h2>
+            <p className="text-lg text-ink/70 leading-relaxed mb-6">
+              Our AI engine doesn't hide behind a chat window. It reads the data and leaves precise, handwritten-style notes in the margins of your assignments and progress reports exactly when you need them.
+            </p>
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles size={32} />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Smart Study Tips</h3>
-              <p className="text-muted">Receive real-time, AI-generated study recommendations based on your performance and weak areas.</p>
+          <div className="relative p-12 bg-paper border border-ledger-line shadow-sm flex flex-col gap-6">
+            <div className="border-b border-ledger-line pb-4 flex justify-between">
+              <span className="font-mono text-sm">Calculus 101: Midterm</span>
+              <span className="font-mono text-sm text-rust">Score: 68%</span>
             </div>
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen size={32} />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Adaptive Curriculum</h3>
-              <p className="text-muted">Courses that adjust their difficulty and content delivery to match your learning pace.</p>
+            <div className="border-b border-ledger-line pb-4 flex justify-between">
+              <span className="font-mono text-sm">Calculus 101: Quiz 4</span>
+              <span className="font-mono text-sm text-ink">Score: 72%</span>
             </div>
-            <div className="card text-center">
-              <div className="w-16 h-16 bg-primary-light text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users size={32} />
-              </div>
-              <h3 className="text-xl font-bold mb-2">Predictive Insights</h3>
-              <p className="text-muted">Identify at-risk areas before exams with our predictive performance modeling.</p>
+            
+            {/* The Marginalia Note overlapping the edge */}
+            <div className="absolute -right-12 top-1/2 -translate-y-1/2">
+              <MarginaliaNote tone="warning" className="w-64">
+                You're consistently struggling with Integration by Parts. Review Chapter 4 notes before the final exam.
+              </MarginaliaNote>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Courses */}
-      <section className="py-16">
-        <div className="container">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <h2 className="text-3xl font-bold">Featured Courses</h2>
-              <p className="text-muted mt-2">Top-rated classes handpicked for you.</p>
-            </div>
-            <Link href="/courses" className="text-primary font-bold hover:underline">View All</Link>
-          </div>
+      {/* Horizontal Scroll Index Cards */}
+      <section>
+        <div className="flex justify-between items-end border-b border-ink pb-4 mb-8">
+          <h2 className="font-serif text-3xl">Featured Curriculum</h2>
+          <Link href="/courses" className="text-sm font-medium hover:text-marigold border-b border-transparent hover:border-marigold pb-0.5">
+            View all →
+          </Link>
+        </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Mock Course Card */}
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="card overflow-hidden" style={{ padding: 0 }}>
-                <div className="h-48 bg-primary-light"></div>
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="badge badge-primary">Computer Science</span>
-                    <span className="flex items-center text-sm font-bold text-warning"><Star size={16} className="mr-1"/> 4.9</span>
+        <div className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory">
+          {featuredCourses.map((course) => (
+            <Link key={course.id} href={`/courses/${course.id}`} className="snap-start shrink-0">
+              <div className="w-80 h-48 bg-paper border border-ledger-line p-6 flex flex-col justify-between hover:border-ink transition-colors">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="text-xs uppercase tracking-wider font-semibold bg-parchment px-2 py-1 border border-ledger-line rounded-[2px]">{course.category}</span>
+                    <span className="font-mono text-xs">★ {course.rating.toFixed(1)}</span>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Advanced Machine Learning</h3>
-                  <p className="text-muted text-sm mb-4">Master neural networks and deep learning with real-world projects.</p>
-                  <Link href="/courses/1" className="btn btn-outline w-full justify-center">View Course</Link>
+                  <h3 className="font-serif text-xl leading-tight line-clamp-2">{course.title}</h3>
+                </div>
+                <div className="font-mono text-sm text-ink/60">
+                  Prof. {course.teacher.name}
                 </div>
               </div>
-            ))}
-          </div>
+            </Link>
+          ))}
         </div>
       </section>
     </div>
-  );
+  )
 }
