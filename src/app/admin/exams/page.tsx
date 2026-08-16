@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableCellMono, TableHead, TableHeader, Tab
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Search, Plus } from 'lucide-react'
+import Link from 'next/link'
 
 const prisma = new PrismaClient()
 
@@ -32,10 +33,12 @@ export default async function AdminExamsPage() {
               className="pl-9 pr-4 py-2 border border-ledger-line rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary-red"
             />
           </div>
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Schedule Exam
-          </Button>
+          <Link href="/admin/exams/new">
+            <Button className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Schedule Exam
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -82,7 +85,9 @@ export default async function AdminExamsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm" className="h-7 text-xs">View Grades</Button>
+                      <Link href={`/admin/exams/${exam.id}/edit`}>
+                        <Button variant="outline" size="sm" className="h-7 text-xs">Manage</Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 )

@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableCellMono, TableHead, TableHeader, Tab
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
 const prisma = new PrismaClient()
 
@@ -19,10 +20,12 @@ export default async function ManageCoursesPage() {
           <h1 className="text-3xl font-bold tracking-tight text-ink">Manage Courses & Classes</h1>
           <p className="text-ink/60 mt-2">Oversee all active subjects and curriculums.</p>
         </div>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Create Course
-        </Button>
+        <Link href="/admin/courses/new">
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Create Course
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -53,7 +56,9 @@ export default async function ManageCoursesPage() {
                     {course.teacher.name || course.teacher.email}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" className="h-7 text-xs">Manage</Button>
+                    <Link href={`/admin/courses/${course.id}/edit`}>
+                      <Button variant="outline" size="sm" className="h-7 text-xs">Manage</Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
