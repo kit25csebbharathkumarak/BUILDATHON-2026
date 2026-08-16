@@ -7,7 +7,7 @@ import { analyzeSubmission } from '@/lib/ai/analysis'
 
 const prisma = new PrismaClient()
 
-export async function submitAssignmentAction(assignmentId: string, formData: FormData) {
+export async function submitAssignmentAction(assignmentId: string, prevState: any, formData: FormData) {
   try {
     const session = await getSession()
     if (!session || session.role !== 'STUDENT') {

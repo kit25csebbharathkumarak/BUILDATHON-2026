@@ -8,14 +8,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   try {
     const student = await prisma.user.findUnique({
-      where: { id, role: 'student' },
+      where: { id, role: 'STUDENT' },
       include: {
         enrollments: {
           include: {
             course: true,
           }
         },
-        grades: {
+        submissions: {
           include: {
             assignment: true,
           }

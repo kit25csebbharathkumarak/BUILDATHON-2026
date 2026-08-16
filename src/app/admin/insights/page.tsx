@@ -53,7 +53,7 @@ export default async function AdminInsightsPage() {
                       {insight.generatedAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </TableCellMono>
                     <TableCell>
-                      {insight.type === 'AT_RISK' && <Badge variant="rust">At Risk</Badge>}
+                      {insight.type === 'AT_RISK' && <Badge variant="warning">At Risk</Badge>}
                       {insight.type === 'WEAK_SUBJECT' && <Badge variant="warning">Weak Subject</Badge>}
                       {insight.type === 'RECOMMENDATION' && <Badge variant="success">Recommendation</Badge>}
                     </TableCell>

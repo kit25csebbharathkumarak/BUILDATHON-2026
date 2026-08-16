@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const student = await prisma.user.findUnique({
       where: { id: studentId },
       include: {
-        grades: { include: { assignment: { include: { course: true } } } }
+        submissions: { include: { assignment: { include: { course: true } } } }
       }
     });
 
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
     }
 
     // Prepare data for the prompt
-    const academicProfile = student.grades.map(g => 
-      `Course: ${g.assignment.course.title}, Assignment: ${g.assignment.title}, Score: ${g.score}`
+    const academicProfile = student.submissions.map(s => 
+      `Course: ${s.assignment.course.title}, Assignment: ${s.assignment.title}, Score: ${s.grade}`
     ).join('; ');
 
     // If no key is provided, return mock insights for the sake of the MVP
