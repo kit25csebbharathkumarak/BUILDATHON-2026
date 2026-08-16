@@ -46,21 +46,38 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {/* Base/Teacher Menu */}
           {!isStudent && (
             <>
+              <div className="text-xs font-semibold text-ink/40 uppercase tracking-wider px-3 mb-2 mt-2 first:mt-0">Teacher Management</div>
               <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard Overview
+              </Link>
+              <Link href="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
                 <User className="w-4 h-4" />
-                Overview
+                Profile
+              </Link>
+              <Link href="/dashboard/courses" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+                <Library className="w-4 h-4" />
+                Manage Courses
               </Link>
               <Link href="/dashboard/assignments" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
                 <BookOpen className="w-4 h-4" />
-                Assignments
+                Manage Assignments
               </Link>
               <Link href="/dashboard/attendance" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
                 <Calendar className="w-4 h-4" />
-                Attendance
+                Track Attendance
               </Link>
               <Link href="/dashboard/grades" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
                 <FileText className="w-4 h-4" />
-                Reports
+                Class Grades
+              </Link>
+              <Link href="/dashboard/recommendations" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+                <Sparkles className="w-4 h-4" />
+                AI Student Insights
+              </Link>
+              <Link href="/dashboard/progress" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+                <TrendingUp className="w-4 h-4" />
+                Class Progress
               </Link>
             </>
           )}
