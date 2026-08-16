@@ -11,7 +11,8 @@ import {
   Sparkles, 
   TrendingUp, 
   Settings, 
-  LogOut 
+  LogOut,
+  LayoutDashboard
 } from 'lucide-react'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -68,6 +69,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {isStudent && (
             <>
               <div className="text-xs font-semibold text-ink/40 uppercase tracking-wider px-3 mb-2 mt-2 first:mt-0">User Dashboard</div>
+              <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard Overview
+              </Link>
               <Link href="/dashboard/profile" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-ink hover:bg-accent-red hover:text-primary-red transition-colors">
                 <User className="w-4 h-4" />
                 Profile
