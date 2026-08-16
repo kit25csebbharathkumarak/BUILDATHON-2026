@@ -21,8 +21,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-parchment flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link href="/" className="font-bold text-ink text-2xl tracking-tight flex items-center justify-center gap-2 mb-8">
-          <span className="w-8 h-8 rounded-lg bg-primary-red text-white flex items-center justify-center">E</span>
-          EduPortal
+          <span className="w-8 h-8 rounded-lg bg-primary-red text-white flex items-center justify-center">4D</span>
+          4D EduPortal
         </Link>
 
         <Card className="shadow-lg border-none">

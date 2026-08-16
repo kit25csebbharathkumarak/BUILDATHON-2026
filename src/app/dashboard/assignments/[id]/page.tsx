@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { notFound, redirect } from 'next/navigation'
+import { SubmissionForm } from './SubmissionForm'
 
 const prisma = new PrismaClient()
 
@@ -87,14 +88,7 @@ export default async function AssignmentDetailsPage(props: { params: Promise<{ i
               ) : (
                 <Card>
                   <CardContent className="p-6">
-                    <form className="space-y-4">
-                      <textarea 
-                        className="w-full h-64 p-4 border border-ledger-line rounded-md focus:outline-none focus:ring-2 focus:ring-primary-red resize-y bg-parchment"
-                        placeholder="Write or paste your submission here..."
-                        required
-                      ></textarea>
-                      <Button type="submit" variant="primary">Submit Assignment</Button>
-                    </form>
+                    <SubmissionForm assignmentId={assignment.id} />
                   </CardContent>
                 </Card>
               )}

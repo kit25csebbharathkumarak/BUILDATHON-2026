@@ -13,8 +13,8 @@ export default async function PublicLayout({
       <header className="border-b border-ledger-line bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="font-bold text-xl text-primary-red tracking-tight flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-primary-red text-white flex items-center justify-center">E</span>
-            EduPortal
+            <span className="w-8 h-8 rounded-lg bg-primary-red text-white flex items-center justify-center">4D</span>
+            4D EduPortal
           </Link>
           
           <nav className="hidden md:flex gap-8">
@@ -50,8 +50,8 @@ export default async function PublicLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="font-bold text-xl text-primary-red tracking-tight mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 rounded-md bg-primary-red text-white flex items-center justify-center text-xs">E</span>
-              EduPortal
+              <span className="w-6 h-6 rounded-md bg-primary-red text-white flex items-center justify-center text-xs">4D</span>
+              4D EduPortal
             </div>
             <p className="text-sm text-ink/70 max-w-xs">
               Modern academic management for students, teachers, and administrators.

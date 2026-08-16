@@ -35,7 +35,7 @@ export default async function DashboardPage() {
     <div className="space-y-8 animate-fade-in">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard Overview</h1>
-        <p className="text-ink/60 mt-2">Welcome back to EduPortal, {session.name}.</p>
+        <p className="text-ink/60 mt-2">Welcome back to 4D EduPortal, {session.name || 'Student'}.</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">

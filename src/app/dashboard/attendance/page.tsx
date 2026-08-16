@@ -132,8 +132,6 @@ export default async function AttendancePage() {
         <EmptyState 
           title="Teacher Attendance View" 
           description="Select a class to take attendance for today."
-          actionLabel="Select Class"
-          onAction={() => {}}
         />
       )}
     </div>

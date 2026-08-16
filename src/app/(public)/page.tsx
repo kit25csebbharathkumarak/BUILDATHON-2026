@@ -28,7 +28,7 @@ export default async function HomePage() {
             The next generation of <span className="text-primary-red">academic management.</span>
           </h1>
           <p className="text-lg md:text-xl text-ink/70 mb-10 max-w-2xl mx-auto">
-            EduPortal brings students, teachers, and administrators together in one powerful, unified platform powered by intelligent insights.
+            4D EduPortal brings students, teachers, and administrators together in one powerful, unified platform powered by intelligent insights.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link href="/register">
