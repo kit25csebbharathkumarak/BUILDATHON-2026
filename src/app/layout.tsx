@@ -1,41 +1,24 @@
-import type { Metadata } from 'next';
-import { Fraunces, Inter, IBM_Plex_Mono } from 'next/font/google';
-import './globals.css';
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-fraunces',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const plexMono = IBM_Plex_Mono({
-  weight: ['400', '500', '600'],
-  subsets: ['latin'],
-  variable: '--font-plex-mono',
-  display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'EduPortal AI',
-  description: 'Education Management Portal with integrated AI',
-};
+  title: 'EduPortal',
+  description: 'Next-generation academic management',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
-      <body className="antialiased font-sans bg-parchment text-ink min-h-screen">
+    <html lang="en">
+      <body className={`${inter.variable} font-sans antialiased bg-paper text-ink selection:bg-primary-red selection:text-white`}>
         {children}
       </body>
     </html>
-  );
+  )
 }

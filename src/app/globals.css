@@ -1,93 +1,42 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #1B2A4A;
-  --color-parchment: #F7F4EC;
-  --color-paper: #FFFFFF;
-  --color-marigold: #D99A2B;
-  --color-sage: #4C7A5E;
-  --color-rust: #B5502F;
-  --color-ledger-line: #D8D2C2;
+  /* Red & White Theme Tokens */
+  --color-paper: #ffffff;
+  --color-ink: #0f172a;
+  --color-parchment: #f8fafc;
+  --color-ledger-line: #e2e8f0;
+  
+  --color-primary-red: #ef4444; /* Tailwind Red 500 */
+  --color-primary-red-hover: #dc2626; /* Tailwind Red 600 */
+  --color-accent-red: #fee2e2; /* Tailwind Red 100 */
 
-  /* Fonts mapped to CSS variables set in layout.tsx */
-  --font-serif: var(--font-fraunces), serif;
-  --font-sans: var(--font-inter), sans-serif;
-  --font-mono: var(--font-plex-mono), monospace;
-
-  /* Override default radiuses to be very sharp */
-  --radius-sm: 2px;
-  --radius: 3px;
-  --radius-md: 4px;
-  --radius-lg: 4px;
-  --radius-xl: 4px;
-  --radius-2xl: 4px;
-  --radius-3xl: 4px;
-
-  /* Shadows - Minimal, crisp */
-  --shadow-sm: 0 1px 2px 0 rgba(27, 42, 74, 0.05);
-  --shadow: 0 1px 3px 0 rgba(27, 42, 74, 0.1), 0 1px 2px -1px rgba(27, 42, 74, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(27, 42, 74, 0.1), 0 2px 4px -2px rgba(27, 42, 74, 0.1);
-}
-
-:root {
-  /* Surface variables for ease of use in non-tailwind specific CSS if needed */
-  --ink: #1B2A4A;
-  --parchment: #F7F4EC;
-  --paper: #FFFFFF;
-  --marigold: #D99A2B;
-  --sage: #4C7A5E;
-  --rust: #B5502F;
-  --ledger-line: #D8D2C2;
+  /* Map old semantic colors to the new theme so components don't break immediately */
+  --color-marigold: #ef4444; 
+  --color-sage: #22c55e;
+  --color-rust: #ef4444;
 }
 
 @layer base {
   body {
-    background-color: var(--parchment);
-    color: var(--ink);
-    font-family: var(--font-sans), sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    color: var(--ink);
-  }
-
-  /* Focus states on interactive elements */
-  *:focus-visible {
-    outline: 2px solid var(--marigold);
-    outline-offset: 2px;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
   }
 }
 
-/* Base Utility Classes */
 @layer utilities {
-  .ledger-border {
-    border-color: var(--ledger-line);
-  }
-  
-  .text-ink {
-    color: var(--ink);
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
   }
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

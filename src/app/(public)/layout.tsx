@@ -1,33 +1,39 @@
 import Link from 'next/link'
 import { getSession } from '@/lib/auth'
 
-export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const session = await getSession()
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Strict ledger-line header, no blur, no generic shadow */}
-      <header className="w-full border-b border-ledger-line bg-paper">
-        <div className="container mx-auto px-6 flex h-16 items-center justify-between">
-          <Link href="/" className="font-serif font-bold text-ink text-2xl tracking-tight">
-            EduAI.
+    <div className="min-h-screen flex flex-col bg-paper">
+      <header className="border-b border-ledger-line bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="font-bold text-xl text-primary-red tracking-tight flex items-center gap-2">
+            <span className="w-8 h-8 rounded-lg bg-primary-red text-white flex items-center justify-center">E</span>
+            EduPortal
           </Link>
           
           <nav className="hidden md:flex gap-8">
-            <Link href="/" className="text-sm font-medium hover:text-marigold transition-colors">Home</Link>
-            <Link href="/courses" className="text-sm font-medium hover:text-marigold transition-colors">Courses</Link>
-            <Link href="/contact" className="text-sm font-medium hover:text-marigold transition-colors">Contact</Link>
+            <Link href="/" className="text-sm font-medium text-ink hover:text-primary-red transition-colors">Home</Link>
+            <Link href="/courses" className="text-sm font-medium text-ink hover:text-primary-red transition-colors">Courses</Link>
+            <Link href="/about" className="text-sm font-medium text-ink hover:text-primary-red transition-colors">About</Link>
           </nav>
           
-          <div className="flex items-center gap-6">
+          <div className="flex gap-4">
             {session ? (
-              <Link href={session.role === 'ADMIN' ? '/admin' : '/dashboard'} className="font-medium text-sm border-b border-ink hover:text-marigold hover:border-marigold transition-all pb-0.5">
+              <Link href="/dashboard" className="text-sm font-medium px-4 py-2 bg-primary-red text-white rounded-md hover:bg-primary-red-hover transition-colors">
                 Go to Dashboard
               </Link>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium hover:text-marigold">Sign In</Link>
-                <Link href="/register" className="text-sm font-medium px-4 py-2 bg-ink text-paper rounded-[2px] hover:bg-ink/90">
+                <Link href="/login" className="text-sm font-medium px-4 py-2 text-ink hover:text-primary-red transition-colors">
+                  Log in
+                </Link>
+                <Link href="/register" className="text-sm font-medium px-4 py-2 bg-primary-red text-white rounded-md hover:bg-primary-red-hover transition-colors shadow-sm">
                   Get Started
                 </Link>
               </>
@@ -36,45 +42,42 @@ export default async function PublicLayout({ children }: { children: React.React
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-[1200px] mx-auto px-6">
+      <main className="flex-grow">
         {children}
       </main>
 
-      <footer className="border-t border-ledger-line py-12 mt-20">
-        <div className="container mx-auto px-6 grid gap-8 md:grid-cols-4">
+      <footer className="bg-parchment border-t border-ledger-line py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Link href="/" className="font-serif font-bold text-ink text-xl mb-4 block">
-              EduAI.
-            </Link>
-            <p className="text-sm text-ink/70">
-              The living gradebook.
+            <div className="font-bold text-xl text-primary-red tracking-tight mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-md bg-primary-red text-white flex items-center justify-center text-xs">E</span>
+              EduPortal
+            </div>
+            <p className="text-sm text-ink/70 max-w-xs">
+              Modern academic management for students, teachers, and administrators.
             </p>
           </div>
           <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Platform</h3>
-            <ul className="space-y-3 text-sm text-ink/70">
-              <li><Link href="/courses" className="hover:text-marigold">Browse Courses</Link></li>
-              <li><Link href="/about" className="hover:text-marigold">About Us</Link></li>
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-ink mb-4">Platform</h4>
+            <ul className="space-y-2">
+              <li><Link href="/courses" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Features</Link></li>
+              <li><Link href="/pricing" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Pricing</Link></li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h3>
-            <ul className="space-y-3 text-sm text-ink/70">
-              <li><Link href="/blog" className="hover:text-marigold">Blog</Link></li>
-              <li><Link href="/help" className="hover:text-marigold">Help Center</Link></li>
-              <li><Link href="/contact" className="hover:text-marigold">Contact Support</Link></li>
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-ink mb-4">Resources</h4>
+            <ul className="space-y-2">
+              <li><Link href="/blog" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Blog</Link></li>
+              <li><Link href="/help" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Help Center</Link></li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h3>
-            <ul className="space-y-3 text-sm text-ink/70">
-              <li><Link href="/privacy" className="hover:text-marigold">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-marigold">Terms of Service</Link></li>
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-ink mb-4">Legal</h4>
+            <ul className="space-y-2">
+              <li><Link href="/privacy" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-sm text-ink/70 hover:text-primary-red transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
-        </div>
-        <div className="container mx-auto px-6 mt-12 pt-8 border-t border-ledger-line text-sm text-ink/50 font-mono">
-          © {new Date().getFullYear()} EduAI. All rights reserved.
         </div>
       </footer>
     </div>

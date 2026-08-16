@@ -1,5 +1,6 @@
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
+import { Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export interface MarginaliaNoteProps extends HTMLAttributes<HTMLDivElement> {
   tone?: 'insight' | 'success' | 'warning';
@@ -7,32 +8,31 @@ export interface MarginaliaNoteProps extends HTMLAttributes<HTMLDivElement> {
 
 export const MarginaliaNote = forwardRef<HTMLDivElement, MarginaliaNoteProps>(
   ({ className, tone = 'insight', children, ...props }, ref) => {
+    const baseStyles = 'p-4 rounded-lg border shadow-sm text-sm flex gap-3 transition-all'
+    
+    const tones = {
+      insight: 'bg-white border-primary-red/20 text-ink',
+      success: 'bg-green-50 border-green-200 text-green-900',
+      warning: 'bg-yellow-50 border-yellow-200 text-yellow-900',
+    }
+
+    const icons = {
+      insight: <Sparkles className="w-5 h-5 text-primary-red shrink-0" />,
+      success: <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />,
+      warning: <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0" />
+    }
+
     return (
       <div
         ref={ref}
-        className={cn(
-          'relative inline-flex items-start gap-2 p-3 text-sm -rotate-1 shadow-sm border border-marigold/30 bg-paper transition-all hover:rotate-0 z-10 font-sans',
-          {
-            'text-marigold': tone === 'insight',
-            'text-sage border-sage/30': tone === 'success',
-            'text-rust border-rust/30': tone === 'warning',
-          },
-          className
-        )}
+        className={cn(baseStyles, tones[tone], className)}
         {...props}
       >
-        <div className={cn('text-lg leading-none font-serif', {
-          'text-marigold': tone === 'insight',
-          'text-sage': tone === 'success',
-          'text-rust': tone === 'warning',
-        })}>
-          *
-        </div>
-        <div className="pt-0.5">
-          {children}
-        </div>
+        {icons[tone]}
+        <div className="leading-relaxed">{children}</div>
       </div>
     );
   }
 );
+
 MarginaliaNote.displayName = 'MarginaliaNote';

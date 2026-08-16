@@ -1,28 +1,28 @@
-import { HTMLAttributes, forwardRef } from 'react';
-import { cn } from '@/lib/utils';
+import { HTMLAttributes, forwardRef } from 'react'
+import { cn } from '@/lib/utils'
 
-export interface BadgeProps extends HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'success' | 'warning' | 'neutral';
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+  variant?: 'default' | 'success' | 'warning' | 'neutral'
 }
 
-export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
+export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
   ({ className, variant = 'default', ...props }, ref) => {
+    const baseStyles = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold transition-colors'
+    
+    const variants = {
+      default: 'bg-accent-red text-primary-red',
+      success: 'bg-green-100 text-green-700',
+      warning: 'bg-yellow-100 text-yellow-700',
+      neutral: 'bg-parchment text-ink/70'
+    }
+
     return (
-      <div
+      <span
         ref={ref}
-        className={cn(
-          'inline-flex items-center rounded-[2px] px-2 py-0.5 text-xs font-mono font-medium border transition-colors focus:outline-none focus:ring-2 focus:ring-marigold focus:ring-offset-2',
-          {
-            'border-transparent bg-ink text-paper': variant === 'default',
-            'border-transparent bg-sage text-paper': variant === 'success',
-            'border-transparent bg-rust text-paper': variant === 'warning',
-            'border-ledger-line bg-parchment text-ink': variant === 'neutral',
-          },
-          className
-        )}
+        className={cn(baseStyles, variants[variant], className)}
         {...props}
       />
-    );
+    )
   }
-);
-Badge.displayName = 'Badge';
+)
+Badge.displayName = 'Badge'

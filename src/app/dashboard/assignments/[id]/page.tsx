@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { MarginaliaNote } from '@/components/ui/MarginaliaNote'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { notFound, redirect } from 'next/navigation'
 
 const prisma = new PrismaClient()
@@ -29,138 +30,138 @@ export default async function AssignmentDetailsPage(props: { params: Promise<{ i
   const isOverdue = new Date(assignment.dueDate) < new Date()
 
   return (
-    <div className="space-y-12 animate-fade-in pb-20">
-      <header className="border-b border-ink pb-6 flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-            <span className="font-mono text-sm text-ink/70 uppercase">{assignment.course.category}</span>
-            {isStudent && submission?.grade && (
-              <Badge variant="success">Graded: {submission.grade}%</Badge>
-            )}
-            {isStudent && !submission && isOverdue && (
-              <Badge variant="warning">Overdue</Badge>
-            )}
-          </div>
-          <h1 className="font-serif text-3xl text-ink mb-2">
-            {assignment.title}
-          </h1>
-          <p className="font-mono text-sm text-ink/70">
-            Due: {assignment.dueDate.toLocaleString()}
-          </p>
+    <div className="space-y-8 animate-fade-in pb-20">
+      <div>
+        <div className="flex items-center gap-4 mb-3">
+          <span className="text-xs font-bold text-primary-red uppercase tracking-wider bg-accent-red px-2 py-1 rounded-md">
+            {assignment.course.category}
+          </span>
+          {isStudent && submission?.grade && (
+            <Badge variant="success">Graded: {submission.grade}%</Badge>
+          )}
+          {isStudent && !submission && isOverdue && (
+            <Badge variant="warning">Overdue</Badge>
+          )}
         </div>
-      </header>
+        <h1 className="text-3xl font-bold tracking-tight text-ink mb-2">
+          {assignment.title}
+        </h1>
+        <p className="text-sm font-medium text-ink/60">
+          Due: {assignment.dueDate.toLocaleString()}
+        </p>
+      </div>
 
-      <div className="grid lg:grid-cols-3 gap-16">
-        <div className="lg:col-span-2 space-y-12">
-          {/* Assignment Description */}
-          <section>
-            <h2 className="font-serif text-xl mb-4 border-b border-ledger-line pb-2">Prompt & Requirements</h2>
-            <div className="font-sans text-ink leading-relaxed">
-              {assignment.description.split('\\n').map((para, idx) => (
-                <p key={idx} className="mb-4">{para}</p>
-              ))}
-            </div>
-          </section>
+      <div className="grid lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Prompt & Requirements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-ink/80 leading-relaxed space-y-4">
+                {assignment.description.split('\\n').map((para, idx) => (
+                  <p key={idx}>{para}</p>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Submission Area (Student) */}
           {isStudent && (
-            <section className="relative">
-              <h2 className="font-serif text-xl mb-4 border-b border-ledger-line pb-2">Your Submission</h2>
+            <section className="space-y-4">
+              <h2 className="text-xl font-bold text-ink">Your Submission</h2>
               
               {submission ? (
-                <div className="relative">
-                  <div className="p-6 bg-paper border border-ledger-line shadow-sm min-h-[200px] font-sans text-ink/90 leading-relaxed whitespace-pre-wrap">
-                    {submission.content}
-                  </div>
+                <div className="space-y-6">
+                  <Card>
+                    <CardContent className="p-6 text-ink/90 leading-relaxed whitespace-pre-wrap">
+                      {submission.content}
+                    </CardContent>
+                  </Card>
                   
-                  {/* The Signature Marginalia Note attached to the submission */}
                   {submission.aiFeedback && (
-                    <div className="absolute top-12 -right-8 z-10 w-64 md:w-80 translate-x-full pr-12 hidden lg:block">
-                      {/* Connecting line */}
-                      <div className="absolute top-4 -left-8 w-8 border-t border-marigold/50 border-dashed"></div>
-                      <MarginaliaNote tone="insight" className="w-full text-left">
-                        {submission.aiFeedback}
-                      </MarginaliaNote>
-                    </div>
-                  )}
-                  {submission.aiFeedback && (
-                    <div className="mt-6 lg:hidden">
-                      <MarginaliaNote tone="insight" className="w-full text-left">
-                        {submission.aiFeedback}
-                      </MarginaliaNote>
-                    </div>
+                    <MarginaliaNote tone="insight">
+                      {submission.aiFeedback}
+                    </MarginaliaNote>
                   )}
                 </div>
               ) : (
-                <form className="space-y-4">
-                  <textarea 
-                    className="w-full h-64 p-4 bg-paper border border-ledger-line rounded-[2px] focus:outline-none focus:border-marigold focus:ring-1 focus:ring-marigold resize-y"
-                    placeholder="Write or paste your submission here..."
-                    required
-                  ></textarea>
-                  <Button type="submit" variant="primary">Submit Assignment</Button>
-                </form>
+                <Card>
+                  <CardContent className="p-6">
+                    <form className="space-y-4">
+                      <textarea 
+                        className="w-full h-64 p-4 border border-ledger-line rounded-md focus:outline-none focus:ring-2 focus:ring-primary-red resize-y bg-parchment"
+                        placeholder="Write or paste your submission here..."
+                        required
+                      ></textarea>
+                      <Button type="submit" variant="primary">Submit Assignment</Button>
+                    </form>
+                  </CardContent>
+                </Card>
               )}
             </section>
           )}
 
-          {/* Teacher View: Submissions List */}
           {!isStudent && (
-            <section>
-              <h2 className="font-serif text-xl mb-4 border-b border-ledger-line pb-2">Submissions</h2>
-              {assignment.submissions.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-ledger-line font-mono text-sm text-ink/50">
-                  No submissions yet.
-                </div>
-              ) : (
-                <div className="border border-ledger-line bg-paper">
+            <Card>
+              <CardHeader>
+                <CardTitle>Submissions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {assignment.submissions.length === 0 ? (
+                  <div className="p-8 text-center text-sm text-ink/50">
+                    No submissions yet.
+                  </div>
+                ) : (
                   <table className="w-full text-sm text-left">
-                    <thead className="bg-parchment border-b border-ink">
+                    <thead className="bg-parchment border-y border-ledger-line">
                       <tr>
-                        <th className="p-4 font-medium">Student</th>
-                        <th className="p-4 font-medium">Status</th>
-                        <th className="p-4 font-medium text-right">Grade</th>
+                        <th className="p-4 font-medium text-ink/70">Student</th>
+                        <th className="p-4 font-medium text-ink/70">Status</th>
+                        <th className="p-4 font-medium text-ink/70 text-right">Grade</th>
                       </tr>
                     </thead>
                     <tbody>
                       {assignment.submissions.map(sub => (
-                        <tr key={sub.id} className="border-b border-ledger-line hover:bg-parchment/50">
-                          <td className="p-4">{sub.student.name}</td>
+                        <tr key={sub.id} className="border-b border-ledger-line">
+                          <td className="p-4 font-medium">{sub.student.name}</td>
                           <td className="p-4">
                             {sub.grade ? <Badge variant="success">Graded</Badge> : <Badge variant="neutral">Needs Grading</Badge>}
                           </td>
-                          <td className="p-4 text-right font-mono">
+                          <td className="p-4 text-right font-medium">
                             {sub.grade ? `${sub.grade}%` : '-'}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                </div>
-              )}
-            </section>
+                )}
+              </CardContent>
+            </Card>
           )}
         </div>
 
-        {/* Sidebar Info */}
         <div className="lg:col-span-1">
-          <div className="p-6 bg-parchment border border-ledger-line rounded-[2px]">
-            <h3 className="font-semibold text-sm uppercase tracking-wider mb-4">Rubric & Info</h3>
-            <ul className="space-y-4 text-sm">
-              <li>
-                <strong className="block text-ink">Weight</strong>
-                <span className="font-mono text-ink/70">20% of Final Grade</span>
-              </li>
-              <li>
-                <strong className="block text-ink">Format</strong>
-                <span className="font-mono text-ink/70">Text Entry</span>
-              </li>
-              <li>
-                <strong className="block text-ink">Late Policy</strong>
-                <span className="font-mono text-ink/70">-10% per day late</span>
-              </li>
-            </ul>
-          </div>
+          <Card className="bg-parchment border-none shadow-none">
+            <CardHeader>
+              <CardTitle className="text-sm uppercase tracking-wider text-ink/50">Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <strong className="block text-ink font-medium">Weight</strong>
+                  <span className="text-ink/70">20% of Final Grade</span>
+                </li>
+                <li>
+                  <strong className="block text-ink font-medium">Format</strong>
+                  <span className="text-ink/70">Text Entry</span>
+                </li>
+                <li>
+                  <strong className="block text-ink font-medium">Late Policy</strong>
+                  <span className="text-ink/70">-10% per day late</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
