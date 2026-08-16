@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  password    String
+  role        String       // 'student', 'teacher', 'admin'
+  createdAt   DateTime     @default(now())
+  enrollments Enrollment[]
+  grades      Grade[]
+}
+
+model Course {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  category    String
+  price       Float        @default(0.0)
+  rating      Float        @default(0.0)
+  teacherId   String
+  enrollments Enrollment[]
+  assignments Assignment[]
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  progress  Int      @default(0)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model Assignment {
+  id        String   @id @default(cuid())
+  title     String
+  type      String   // 'Quiz', 'Project'
+  dueDate   DateTime
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  grades    Grade[]
+}
+
+model Grade {
+  id           String     @id @default(cuid())
+  score        Float
+  feedback     String?
+  userId       String
+  assignmentId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+}
